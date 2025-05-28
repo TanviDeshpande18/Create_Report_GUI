@@ -1,0 +1,15 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project specific
+Pipeline_Dependencies/
+
+# Credentials and tokens
+configs/credentials_tanvi.json
+configs/token.pickle
+configs/*.json
+configs/*.pickle
+.env
+.env.*
