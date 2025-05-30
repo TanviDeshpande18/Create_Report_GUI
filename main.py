@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
                             QDesktopWidget, QSplitter, QScrollArea, QVBoxLayout)
 from PyQt5.QtCore import Qt
 from left_panel import LeftPanelWidget
+from middle_panel import MiddlePanelWidget
+from right_panel import RightPanelWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -23,10 +25,10 @@ class MainWindow(QMainWindow):
 
         # Create three empty panels
         left_panel = LeftPanelWidget() 
-        middle_panel = QWidget()
+        middle_panel = MiddlePanelWidget()
         
         # Create right panel with scroll area
-        right_panel = QWidget()
+        right_panel = RightPanelWidget()
         right_layout = QVBoxLayout()
         right_panel.setLayout(right_layout)
         

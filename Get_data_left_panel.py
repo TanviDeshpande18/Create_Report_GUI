@@ -11,7 +11,11 @@ import pickle
 
 class DriveDataHandler:
     def __init__(self):
-        self.SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+        self.SCOPES = [
+            'https://www.googleapis.com/auth/drive.readonly',
+            'https://www.googleapis.com/auth/drive.file',
+            'https://www.googleapis.com/auth/drive'
+        ]
         self.creds = None
         self.service = None
         self.config = ConfigHandler()

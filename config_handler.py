@@ -4,7 +4,7 @@ import json
 class ConfigHandler:
     def __init__(self):
         self.config_dir = '/home/tanvi/Projects/Create_Report_GUI/configs'
-        self.credentials_path = os.path.join(self.config_dir, 'credentials.json')
+        self.credentials_path = os.path.join(self.config_dir, 'credentials_tanvi.json')
         self.token_path = os.path.join(self.config_dir, 'token.pickle')
         self.folder_config_path = os.path.join(self.config_dir, 'folder_config.json')
 
@@ -21,4 +21,21 @@ class ConfigHandler:
             with open(self.folder_config_path, 'r') as f:
                 config = json.load(f)
                 return config.get('folder_id')
+        raise FileNotFoundError("folder_config.json not found in configs directory")
+    
+
+    def get_template_folder_id(self):
+        """Get template folder ID from config."""
+        if os.path.exists(self.folder_config_path):
+            with open(self.folder_config_path, 'r') as f:
+                config = json.load(f)
+                return config.get('template_id')
+        raise FileNotFoundError("folder_config.json not found in configs directory")
+    
+    def get_output_folder_id(self):
+        """Get output folder ID from config."""
+        if os.path.exists(self.folder_config_path):
+            with open(self.folder_config_path, 'r') as f:
+                config = json.load(f)
+                return config.get('output_folder_id')
         raise FileNotFoundError("folder_config.json not found in configs directory")
