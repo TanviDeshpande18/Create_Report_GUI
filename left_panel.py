@@ -15,6 +15,8 @@ class LeftPanelWidget(QWidget):
 
         ## Get data from Google Drive
         project_code_list, sample_name_list, references = gd.main()  # Call the main function from Get_data_left_panel
+        self.full_sample_list = sample_name_list  # Store full list
+
 
         # Create Project Code dropdown section
         project_label = QLabel("Select Project Code:")
@@ -52,21 +54,26 @@ class LeftPanelWidget(QWidget):
         layout.addSpacing(20)  # Add spacing after reference section
         
         # Create Sample Name group
-        sample_group = QGroupBox("Sample Name:")
-        sample_layout = QVBoxLayout()
+        self.sample_group = QGroupBox("Sample Name:")
+        self.sample_layout = QVBoxLayout()
+        self.sample_group.setLayout(self.sample_layout)
         
-        # Create checkboxes dynamically from sample_name_list
+        # Initialize empty dict for checkboxes
         self.sample_checkboxes = {}
-        for sample_name in sample_name_list:
-            checkbox = QCheckBox(sample_name)
-            self.sample_checkboxes[sample_name] = checkbox
-            sample_layout.addWidget(checkbox)
-            checkbox.stateChanged.connect(self.on_sample_changed)
-            
-        sample_group.setLayout(sample_layout)
+        
+        # Create a container widget for checkboxes
+        self.checkbox_container = QWidget()
+        self.checkbox_layout = QVBoxLayout()
+        self.checkbox_container.setLayout(self.checkbox_layout)
+        
+        # Add checkbox container to sample layout
+        self.sample_layout.addWidget(self.checkbox_container)
         
         # Add sample group to main layout
-        layout.addWidget(sample_group)
+        layout.addWidget(self.sample_group)
+        
+        # Hide only the checkbox container initially
+        self.checkbox_container.hide()
         
         # Add stretch to push widgets to top
         layout.addStretch()
@@ -78,7 +85,32 @@ class LeftPanelWidget(QWidget):
         self.reference_combo.currentIndexChanged.connect(self.on_reference_changed)
 
     def on_project_changed(self, index):
-        print(f"Selected project: {self.project_combo.currentText()}")
+        project_code = self.project_combo.currentText()
+        print(f"Selected project: {project_code}")
+        
+        # Clear existing checkboxes
+        for checkbox in self.sample_checkboxes.values():
+            self.checkbox_layout.removeWidget(checkbox)
+            checkbox.deleteLater()
+        self.sample_checkboxes.clear()
+        
+        if project_code != "None":
+            # Filter samples that start with the project code
+            filtered_samples = [
+                sample for sample in self.full_sample_list 
+                if sample.startswith(project_code)
+            ]
+            
+            # Create new checkboxes for filtered samples
+            for sample_name in filtered_samples:
+                checkbox = QCheckBox(sample_name)
+                self.sample_checkboxes[sample_name] = checkbox
+                self.checkbox_layout.addWidget(checkbox)
+                checkbox.stateChanged.connect(self.on_sample_changed)
+            
+            self.checkbox_container.show()
+        else:
+            self.checkbox_container.hide()
 
     def on_sample_changed(self, state):
         checkbox = self.sender()

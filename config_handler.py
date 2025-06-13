@@ -39,3 +39,11 @@ class ConfigHandler:
                 config = json.load(f)
                 return config.get('output_folder_id')
         raise FileNotFoundError("folder_config.json not found in configs directory")
+    
+    def get_finalreport_folder_id(self):
+        """Get report folder ID from config."""
+        if os.path.exists(self.folder_config_path):
+            with open(self.folder_config_path, 'r') as f:
+                config = json.load(f)
+                return config.get('pdf_report_folder_id')
+        raise FileNotFoundError("folder_config.json not found in configs directory")

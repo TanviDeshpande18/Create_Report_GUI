@@ -71,9 +71,9 @@ class MiddlePanelWidget(QWidget):
         button_layout = QHBoxLayout()      
         
         # Add Create Report button
-        create_report_btn = QPushButton("Create Report")
-        create_report_btn.clicked.connect(self.create_report)
-        create_report_btn.setStyleSheet("""
+        structure_report_btn = QPushButton("Structure Report")
+        structure_report_btn.clicked.connect(self.structure_report)
+        structure_report_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
@@ -84,7 +84,7 @@ class MiddlePanelWidget(QWidget):
                 background-color: #45a049;
             }
         """)
-        button_layout.addWidget(create_report_btn)
+        button_layout.addWidget(structure_report_btn)
 
         # Add button layout to main layout
         layout.addLayout(button_layout)
@@ -153,8 +153,8 @@ class MiddlePanelWidget(QWidget):
                                      if t[1] != checkbox.objectName()]
         print(f"Template '{checkbox.text()}' {'selected' if state else 'unselected'}")
 
-    def create_report(self):
-        """Create a new report from selected templates"""
+    def structure_report(self):
+        """Create a new report with selected template names"""
         if not self.selected_templates:
             QMessageBox.warning(self, "Error", "Please select at least one template")
             return
@@ -162,9 +162,9 @@ class MiddlePanelWidget(QWidget):
         try:
             # Create a new Google Doc
             file_metadata = {
-                'name': f'Generated Report {datetime.now().strftime("%Y%m%d_%H%M%S")}',
+                'name': f'Template List {datetime.now().strftime("%Y%m%d_%H%M%S")}',
                 'mimeType': 'application/vnd.google-apps.document',
-                'parents': [self.handler.config.get_output_folder_id()]  # Get output folder ID from config
+                'parents': [self.handler.config.get_output_folder_id()]
             }
 
             # Create empty document
@@ -173,35 +173,35 @@ class MiddlePanelWidget(QWidget):
                 fields='id'
             ).execute()
 
-            # Append content from each selected template
-            combined_content = []
-            for template_name, template_id in self.selected_templates:
-                try:
-                    content = self.handler.service.files().export(
-                        fileId=template_id,
-                        mimeType='text/plain'
-                    ).execute()
-                    combined_content.append(content.decode('utf-8'))
-                except Exception as e:
-                    print(f"Error reading template {template_name}: {str(e)}")
+            # Get names of selected templates and create content
+            template_names = [name for name, _ in self.selected_templates]
+            content = "\n".join(template_names)
 
-            # Update the new document with combined content
+            # Update the document with template names
             self.handler.service.files().update(
                 fileId=file['id'],
                 media_body=MediaIoBaseUpload(
-                    io.BytesIO('\n\n'.join(combined_content).encode('utf-8')),
+                    io.BytesIO(content.encode('utf-8')),
                     mimetype='text/plain'
                 )
             ).execute()
 
+            # Show success message
             QMessageBox.information(
                 self, 
                 "Success", 
-                f"Report created successfully!\nTemplates used: {len(self.selected_templates)}"
+                f"Template list created successfully!\nNumber of templates: {len(template_names)}"
             )
 
+            # Uncheck all checkboxes
+            for checkbox in self.template_checkboxes.values():
+                checkbox.setChecked(False)
+
+            # Clear selected templates list
+            self.selected_templates.clear()
+
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to create report: {str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to create template list: {str(e)}")
 
 if __name__ == '__main__':
     import sys

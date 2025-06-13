@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTextEdit, 
-                            QLabel, QScrollArea, QGroupBox)
+                            QLabel, QScrollArea, QGroupBox,
+                            QPushButton, QHBoxLayout, QMessageBox)
 from PyQt5.QtCore import Qt
-from Get_data_middle_panel import TemplateHandler
+from Get_data_right_panel import RightPanelHandler
 from googleapiclient.http import MediaIoBaseDownload
 import io
 
@@ -9,17 +10,43 @@ class RightPanelWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.init_ui()
-        self.template_handler = TemplateHandler()
+        self.right_panel_handler = RightPanelHandler()
 
     def init_ui(self):
         # Create main layout
         layout = QVBoxLayout()
         self.setLayout(layout)
 
+        # Create top header container
+        header_layout = QHBoxLayout()
+        
         # Create heading label
         heading_label = QLabel("Report Preview")
         heading_label.setStyleSheet("font-size: 14pt; font-weight: bold;")
-        layout.addWidget(heading_label)
+        header_layout.addWidget(heading_label)
+        
+        # Add stretch to push button to right
+        header_layout.addStretch()
+        
+        # Create View Report button
+        self.view_btn = QPushButton("View Report")
+        self.view_btn.clicked.connect(self.view_report)
+        self.view_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                padding: 5px 15px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
+        header_layout.addWidget(self.view_btn)
+        
+        # Add header to main layout
+        layout.addLayout(header_layout)
         layout.addSpacing(20)
 
         # Create preview group box
@@ -35,40 +62,38 @@ class RightPanelWidget(QWidget):
         # Add preview group to main layout
         layout.addWidget(preview_group)
 
-    def display_template_content(self, file_id):
-        """Display the content of the selected template"""
-        if not file_id:
-            self.content_display.clear()
-            return
-
+        
+    def view_report(self):
+        """Handle View Report button click and display content."""
         try:
-            if self.template_handler.authenticate():
-                # Get file metadata
-                file = self.template_handler.service.files().get(
-                    fileId=file_id, 
-                    fields='name,mimeType'
-                ).execute()
-
-                # For Google Docs
-                if file['mimeType'] == 'application/vnd.google-apps.document':
-                    content = self.template_handler.service.files().export(
-                        fileId=file_id,
-                        mimeType='text/plain'
-                    ).execute()
-                    text_content = content.decode('utf-8')
+            if self.right_panel_handler.authenticate():
+                print("Authentication successful")
+                latest_file = self.right_panel_handler.get_latest_file()
+                if latest_file:
+                    print(f"Processing template list: {latest_file['name']}")
+                    merged_doc_id = self.right_panel_handler.create_merged_document(latest_file['id'])
+                    if merged_doc_id:
+                        # Get content of merged document
+                        merged_content = self.right_panel_handler.get_file_content(merged_doc_id)
+                        if merged_content:
+                            # Display content in preview
+                            self.content_display.setText(merged_content)
+                            QMessageBox.information(self, "Success", 
+                                "Report merged successfully! Check the preview below.")
+                        else:
+                            QMessageBox.warning(self, "Error", 
+                                "Failed to load merged document content.")
+                    else:
+                        QMessageBox.warning(self, "Error", 
+                            "Failed to merge document. Check the console for details.")
                 else:
-                    # For other document types
-                    request = self.template_handler.service.files().get_media(fileId=file_id)
-                    file_content = io.BytesIO()
-                    downloader = MediaIoBaseDownload(file_content, request)
-                    done = False
-                    while not done:
-                        _, done = downloader.next_chunk()
-                    text_content = file_content.getvalue().decode('utf-8')
-
-                # Display content
-                self.content_display.setText(text_content)
-                self.content_display.setDocumentTitle(file['name'])
-
+                    QMessageBox.warning(self, "Error", 
+                        "No template list found. Please create one first.")
+            else:
+                QMessageBox.critical(self, "Error", 
+                    "Authentication failed. Check your credentials.")
+                
         except Exception as e:
-            self.content_display.setText(f"Error loading template content: {str(e)}")
+            QMessageBox.critical(self, "Error", 
+                f"An error occurred while creating the report: {str(e)}")
+
