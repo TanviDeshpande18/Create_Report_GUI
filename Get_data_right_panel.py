@@ -81,6 +81,7 @@ class RightPanelHandler:
         except Exception as e:
             print(f"Error getting latest file: {str(e)}")
             return None
+        
 
     def get_file_content(self, file_id):
         """Get content of a file by ID."""

@@ -50,9 +50,9 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(scroll)
 
         # Add background colors to distinguish panels (optional)
-        left_panel.setStyleSheet("background-color: #f0f0f0;")
-        middle_panel.setStyleSheet("background-color: #e0e0e0;")
-        right_panel.setStyleSheet("background-color: #f0f0f0;")
+        # left_panel.setStyleSheet("background-color: #f0f0f0;")
+        # middle_panel.setStyleSheet("background-color: #e0e0e0;")
+        # right_panel.setStyleSheet("background-color: #f0f0f0;")
 
         # Add widgets to splitter
         splitter.addWidget(left_panel)
