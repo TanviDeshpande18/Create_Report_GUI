@@ -97,6 +97,7 @@ class HTMLGenerator:
                 reference=report_data['reference'] or 'None',
                 samples=samples_html,
                 templates=templates_html,
+                conclusion=report_data['conclusion'],
                 timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
             

@@ -104,7 +104,7 @@ class RightPanelWidget(QWidget):
             }
         """)
         header_layout.addWidget(self.export_docx_btn)
-        
+      
         # Add header to main layout
         self.main_layout.addLayout(header_layout)
         self.main_layout.addSpacing(20)
@@ -121,7 +121,6 @@ class RightPanelWidget(QWidget):
 
         # Add preview group to main layout
         self.main_layout.addWidget(preview_group)
-
 
     def export_to_pdf(self):
         """Export the current content to PDF."""

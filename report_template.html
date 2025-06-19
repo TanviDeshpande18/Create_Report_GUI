@@ -4,19 +4,27 @@
     <meta charset="utf-8">
     <title>{title}</title>
     <style>
+        @page {{
+            size: A4;
+            margin: 0;
+        }}
         body {{ 
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            margin: 20px;
+            margin: 0;
             background-color: #f5f5f5;
         }}
-        .container {{
-            max-width: 800px;
+        .page {{
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
             margin: 0 auto;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            page-break-after: always;
+        }}
+        .page:last-child {{
+            page-break-after: avoid;
         }}
         h1 {{ 
             color: #2196F3;
@@ -55,54 +63,76 @@
             width: 1em;
             margin-left: -1em;
         }}
-        
         .logo-container {{
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }}
-        
         .company-logo {{
             max-width: 200px;
             height: auto;
         }}
-        
         .dna-logo {{
             max-width: 100px;
             height: auto;
         }}
+        .grid-container {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;  /* Two columns */
+            grid-template-rows: 1fr 1fr;     /* Two rows */
+            gap: 20px;                       /* Space between grid items */
+            height: calc(100vh - 40px);      /* Full height minus margins */
+            width: calc(100% - 40px);        /* Full width minus margins */
+            margin: 20px;
+            aspect-ratio: 1;                 /* Keep it square */
+        }}
+        .grid-item {{
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            min-height: 200px;              /* Minimum height for each grid item */
+            display: flex;                  /* For centering content */
+            justify-content: center;
+            align-items: center;
+        }}
+        @media print {{
+            body {{
+                background: none;
+            }}
+            .page {{
+                box-shadow: none;
+                margin: 0;
+            }}
+        }}
     </style>
 </head>
 <body>
-    <div class="container">
-        {logos}
-        <h1>{title}</h1>
-        
-        <div class="section">
-            <h2>Project Information</h2>
-            <p><strong>Project Code:</strong> {project}</p>
-            <p><strong>Analysis Type:</strong> {analysis_type}</p>
-            <p><strong>Reference:</strong> {reference}</p>
+    <!-- Page 1 with grid -->
+    <div class="page">
+        <div class="grid-container">
+            <div class="grid-item">This is test page1 - Item 1</div>
+            <div class="grid-item">This is test page1 - Item 2</div>
+            <div class="grid-item">This is test page1 - Item 3</div>
+            <div class="grid-item">This is test page1 - Item 4</div>
         </div>
+    </div>
 
-        <div class="section">
-            <h2>Selected Samples</h2>
-            <ul>
-                {samples}
-            </ul>
-        </div>
+    <!-- Page 2 -->
+    <div class="page">
+        <a>This is test page2</a>
+    </div>
 
-        <div class="section">
-            <h2>Selected Templates</h2>
-            <ul>
-                {templates}
-            </ul>
-        </div>
+    <!-- Page 3 -->
+    <div class="page">
+        <a>This is test page3</a>
+    </div>
 
-        <div class="timestamp">
-            Generated on: {timestamp}
-        </div>
+    <!-- Page 4 -->
+    <div class="page">
+        <a>This is test page4</a>
     </div>
 </body>
 </html>

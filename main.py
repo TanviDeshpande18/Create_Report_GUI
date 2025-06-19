@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         splitter.addWidget(right_panel)
 
         # Set initial sizes for the three panels (33% each)
-        splitter.setSizes([width//3, width//3, width//3])
+        splitter.setSizes([int(width * 0.25), int(width * 0.35), int(width * 0.40)])
         
         # Store references for later use
         self.scroll_layout = scroll_layout

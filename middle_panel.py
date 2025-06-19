@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QCheckBox, 
                             QLabel, QPushButton, QGroupBox,
-                            QDialog, QTextEdit, QMessageBox, QHBoxLayout)
+                            QDialog, QTextEdit, QMessageBox, QHBoxLayout,
+                            QScrollArea, QSizePolicy)
+from PyQt5.QtCore import Qt
 from Get_data_middle_panel import TemplateHandler
 from html_generator import HTMLGenerator
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
@@ -45,52 +47,85 @@ class MiddlePanelWidget(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
+        # Create header container
+        header_layout = QHBoxLayout()
+
         # Create heading label with larger font
         heading_label = QLabel("Select Templates for Report")
         heading_label.setStyleSheet("font-size: 14pt; font-weight: bold;")
-        layout.addWidget(heading_label)
-        layout.addSpacing(20)
+        header_layout.addWidget(heading_label)
+        header_layout.addStretch()  # Add stretch to push button to right
 
-        # Create template group box
-        template_group = QGroupBox("Available Templates")
-        template_layout = QVBoxLayout()
-        template_group.setLayout(template_layout)
-
-        # Create dictionary to store checkboxes
-        self.template_checkboxes = {}
-        
-        # Add template group to main layout
-        layout.addWidget(template_group)
-        
-        # Store template layout for later use
-        self.template_layout = template_layout
-
-        # Add refresh button
-        refresh_btn = QPushButton("Refresh Templates")
-        refresh_btn.clicked.connect(self.load_documents)
-        layout.addWidget(refresh_btn)  
-
-        # Add buttons container
-        button_layout = QHBoxLayout()      
-        
-        # Add Create Report button
+        # Add Create Report button to header
         create_report_btn = QPushButton("Create Report")
         create_report_btn.clicked.connect(self.create_report)
         create_report_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
-                padding: 5px;
+                padding: 5px 15px;
                 font-weight: bold;
+                border-radius: 4px;
             }
             QPushButton:hover {
                 background-color: #45a049;
             }
         """)
-        button_layout.addWidget(create_report_btn)
+        header_layout.addWidget(create_report_btn)
+      
+        # Add header layout to main layout
+        layout.addLayout(header_layout)
+        layout.addSpacing(20)
 
-        # Add button layout to main layout
-        layout.addLayout(button_layout)
+        # Create template group box
+        template_group = QGroupBox("Available Templates")
+        template_group_layout = QVBoxLayout()
+        template_group.setLayout(template_group_layout)
+        template_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        template_group.setMinimumHeight(int(self.height() * 1.2))  
+
+        
+        # Create scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setFixedHeight(int(self.height() * 1.2))
+
+        # Create container for templates
+        self.template_container = QWidget()
+        self.template_layout = QVBoxLayout(self.template_container)
+        self.template_container.setLayout(self.template_layout)
+
+        # Set container in scroll area
+        scroll_area.setWidget(self.template_container)
+        
+        # Add scroll area to group layout
+        template_group_layout.addWidget(scroll_area)
+        
+        # Add template group to main layout
+        layout.addWidget(template_group)
+
+        # Create dictionary to store checkboxes
+        self.template_checkboxes = {}        
+        
+        # Add refresh button
+        refresh_btn = QPushButton("Refresh Templates")
+        refresh_btn.clicked.connect(self.load_documents)
+        layout.addWidget(refresh_btn) 
+        # layout.addSpacing(20) 
+
+
+        # Add conclusion section
+        conclusion_group = QGroupBox("Conclusion")
+        conclusion_layout = QVBoxLayout()
+        
+        self.conclusion_text = QTextEdit()
+        self.conclusion_text.setPlaceholderText("Enter your conclusion here...")
+        self.conclusion_text.setMinimumHeight(50)
+        conclusion_layout.addWidget(self.conclusion_text)
+        
+        conclusion_group.setLayout(conclusion_layout)
+        layout.addWidget(conclusion_group)   
         
         # Add stretch to push widgets to top
         layout.addStretch()
@@ -108,10 +143,13 @@ class MiddlePanelWidget(QWidget):
             # Add template files as checkboxes
             for file in files:
                 checkbox = QCheckBox(file['name'])
-                checkbox.setObjectName(file['id'])  # Store file ID in object name
+                checkbox.setObjectName(file['id'])
                 checkbox.stateChanged.connect(self.on_checkbox_changed)
                 self.template_checkboxes[file['id']] = checkbox
                 self.template_layout.addWidget(checkbox)
+            
+            # Add stretch at the end
+            self.template_layout.addStretch()
 
     def show_template_preview(self, name, file_id):
         """Show preview for a single template"""
@@ -215,6 +253,9 @@ class MiddlePanelWidget(QWidget):
                 {'name': name, 'id': file_id}
                 for name, file_id in self.selected_templates
             ]
+
+            # Add conclusion to report data
+            report_data['conclusion'] = self.conclusion_text.toPlainText()
             
             # If there are warnings, show them and return None
             if warnings:
