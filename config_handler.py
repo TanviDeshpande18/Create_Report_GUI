@@ -16,11 +16,11 @@ class ConfigHandler:
     def get_token_path(self):
         return self.token_path
 
-    def get_folder_id(self):
+    def get_main_folder_id(self):
         if os.path.exists(self.folder_config_path):
             with open(self.folder_config_path, 'r') as f:
                 config = json.load(f)
-                return config.get('folder_id')
+                return config.get('main_folder_id')
         raise FileNotFoundError("folder_config.json not found in configs directory")
     
 
@@ -32,12 +32,12 @@ class ConfigHandler:
                 return config.get('template_id')
         raise FileNotFoundError("folder_config.json not found in configs directory")
     
-    def get_output_folder_id(self):
+    def get_html_folder_id(self):
         """Get output folder ID from config."""
         if os.path.exists(self.folder_config_path):
             with open(self.folder_config_path, 'r') as f:
                 config = json.load(f)
-                return config.get('output_folder_id')
+                return config.get('html_folder_id')
         raise FileNotFoundError("folder_config.json not found in configs directory")
     
     def get_finalreport_folder_id(self):

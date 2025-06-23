@@ -49,7 +49,7 @@ class DriveDataHandler:
     def get_folder_files(self):
         """Get all files from configured folder."""
         try:
-            folder_id = self.config.get_folder_id()
+            folder_id = self.config.get_main_folder_id()
             print(f"Folder ID: {folder_id}")
             
             query = f"parents='{folder_id}' and trashed=false"

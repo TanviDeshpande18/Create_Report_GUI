@@ -5,14 +5,19 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTextEdit,
 from PyQt5.QtPrintSupport import QPrinter  # Add for PDF export
 from PyQt5.QtCore import Qt, QMarginsF
 from PyQt5.QtGui import QTextDocument
+from config_handler import ConfigHandler
 from Get_data_right_panel import RightPanelHandler
-from googleapiclient.http import MediaIoBaseDownload
+from html_generator import HTMLGenerator
+import serve_html_content as serve_html
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 import io
 from datetime import datetime
 from docx import Document
 from docx.shared import Inches, Pt
 from html.parser import HTMLParser
 from io import StringIO
+import tempfile
+import webbrowser
 
 
 
@@ -34,8 +39,10 @@ class RightPanelWidget(QWidget):
         super().__init__(parent)
         self.init_ui()
         self.setObjectName("right_panel") 
+        self.html_generator = HTMLGenerator()
+        self.handler = RightPanelHandler()
         # Initialize handler after UI
-        self.right_panel_handler = RightPanelHandler()
+        self.config_handler = ConfigHandler()
         
     def init_ui(self):
         # Create main layout once
@@ -53,22 +60,22 @@ class RightPanelWidget(QWidget):
         # Add stretch to push button to right
         header_layout.addStretch()
         
-        # # Create View Report button
-        # self.view_btn = QPushButton("View Report")
-        # self.view_btn.clicked.connect(self.view_report)
-        # self.view_btn.setStyleSheet("""
-        #     QPushButton {
-        #         background-color: #2196F3;
-        #         color: white;
-        #         padding: 5px 15px;
-        #         border-radius: 3px;
-        #         font-weight: bold;
-        #     }
-        #     QPushButton:hover {
-        #         background-color: #1976D2;
-        #     }
-        # """)
-        # header_layout.addWidget(self.view_btn)
+        # Add Create Report button to header
+        create_report_btn = QPushButton("Create Report")
+        create_report_btn.clicked.connect(self.create_report)
+        create_report_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                padding: 5px 15px;
+                font-weight: bold;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+        """)
+        header_layout.addWidget(create_report_btn)
 
         # Create Export PDF button
         self.export_btn = QPushButton("Export PDF")
@@ -206,4 +213,134 @@ class RightPanelWidget(QWidget):
                 self,
                 "Error",
                 f"Failed to export DOCX: {str(e)}"
+            )
+
+    def create_report(self):
+        """Collect report data from both panels and validate."""
+        try:
+            # Get the main window and find left panel
+            main_window = self.window()  # Get the top-level window
+            left_panel = main_window.findChild(QWidget, "left_panel")
+            middle_panel = main_window.findChild(QWidget, "middle_panel")
+            right_panel = main_window.findChild(QWidget, "right_panel")
+            
+            if not all([left_panel, middle_panel, right_panel]):
+                QMessageBox.critical(self, "Error", "Could not find required panels")
+                return
+            
+            # Initialize warnings list
+            warnings = []
+            
+            # Validate and collect data from left panel
+            report_data = {}
+            
+            # Check project selection
+            project_code = left_panel.project_combo.currentText()
+            if project_code == "None":
+                warnings.append("Please select a project")
+            report_data['project'] = project_code if project_code != "None" else None
+            
+            # Check analysis type
+            if not (left_panel.genome_radio.isChecked() or left_panel.transcriptome_radio.isChecked()):
+                warnings.append("Please select an analysis type")
+            report_data['analysis_type'] = (
+                'Genome' if left_panel.genome_radio.isChecked() 
+                else 'Transcriptome' if left_panel.transcriptome_radio.isChecked()
+                else None
+            )
+            
+            # Check reference
+            reference = left_panel.reference_combo.currentText()
+            report_data['reference'] = reference if reference != "None" else None
+            
+            # Check selected samples
+            selected_samples = [
+                sample for sample, checkbox in left_panel.sample_checkboxes.items()
+                if checkbox.isChecked()
+            ]
+            if not selected_samples:
+                warnings.append("Please select at least one sample")
+            report_data['selected_samples'] = selected_samples
+
+            # Check title
+            title = left_panel.title_input.text().strip()
+            if not title:
+                warnings.append("Report title is required")
+            report_data['title'] = title
+            
+            # Check selected templates from middle panel
+            if not middle_panel.selected_templates:
+                warnings.append("Please select at least one template")
+            report_data['templates'] = [
+                {'name': name, 'id': file_id}
+                for name, file_id in middle_panel.selected_templates
+            ]
+
+            # Add conclusion to report data
+            report_data['conclusion'] = middle_panel.conclusion_text.toPlainText()
+            
+            # If there are warnings, show them and return None
+            if warnings:
+                QMessageBox.warning(
+                    self,
+                    "Validation Error",
+                    "Please fix the following issues:\n• " + "\n• ".join(warnings)
+                )
+                return None
+                
+            print(report_data)
+                
+        
+            # Generate HTML content
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            html_content = self.html_generator.generate_html(report_data)
+            if html_content:
+                # Prepare in-memory file for upload
+                html_bytes = io.BytesIO(html_content.encode('utf-8'))
+
+                # Set your Google Drive folder ID here
+                html_output_folder_id = self.config_handler.get_html_folder_id()
+
+                file_metadata = {
+                    'name': f"{report_data['title']}.html",
+                    'parents': [html_output_folder_id],
+                    'mimeType': 'text/html'
+                }
+                media = MediaIoBaseUpload(html_bytes, mimetype='text/html', resumable=False)
+
+                if not self.handler.authenticate():
+                    QMessageBox.critical(self, "Error", "Google Drive authentication failed.")
+                    return
+
+                uploaded_file = self.handler.drive_service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields='id, webViewLink'
+                ).execute()
+
+                # Serve HTML safely
+                serve_html.serve_html_safely(html_content, serve_time=10)
+                # web_link = uploaded_file.get('webViewLink')
+                # # print(f"HTML file uploaded to Drive. View at: {web_link}")
+
+                # # Open the uploaded HTML file in the default web browser
+                # webbrowser.open(web_link)
+
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    f"Report uploaded to Google Drive!"
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    "Failed to generate HTML content"
+                )
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Error creating report: {str(e)}"
             )

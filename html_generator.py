@@ -7,7 +7,8 @@ from Get_data_middle_panel import TemplateHandler
 
 class HTMLGenerator:
     def __init__(self):
-        self.template_path = os.path.join(os.path.dirname(__file__), 'report_template.html')
+        self.template_path = os.path.join(os.path.dirname(__file__), 'templates/report_template.html')
+        self.stylesheet = os.path.join(os.path.dirname(__file__), 'static/style.css')
         self.handler = TemplateHandler()
         if not self.handler.authenticate():
             raise Exception("Authentication failed")
@@ -88,8 +89,15 @@ class HTMLGenerator:
                 logo_html += f'<img src="{logos["dna"]}" class="dna-logo">'
             logo_html += '</div>'
 
+            with open(self.stylesheet) as f:
+                css = f.read()
+
+            # print(css)
+            # print(type(css))
+
             # Replace placeholders
             html_content = template.format(
+                css = css,
                 logos=logo_html,
                 title=report_data['title'],
                 project=report_data['project'],
@@ -100,7 +108,7 @@ class HTMLGenerator:
                 conclusion=report_data['conclusion'],
                 timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
-            
+            # print(html_content)
             return html_content
             
         except Exception as e:
