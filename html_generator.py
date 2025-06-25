@@ -32,6 +32,7 @@ class HTMLGenerator:
                 print("No logos found in logo folder")
                 return None
             
+            # print("IMAGE FILES", files)
             # Find specific logos by name
             for file in files:
                 if 'dna' in file['name'].lower():
@@ -77,17 +78,16 @@ class HTMLGenerator:
                 template = f.read()
             
             # Format samples and templates lists
-            samples_html = '\n'.join([f'<li>{sample}</li>' for sample in report_data['selected_samples']])
-            templates_html = '\n'.join([f'<li>{t["name"]}</li>' for t in report_data['templates']])
+            samples_html = '\n'.join([f'<a>{sample}</a>' for sample in report_data['selected_samples']])
+            templates_html = '\n'.join([f'<a>{t["name"]}</a>' for t in report_data['templates']])
 
 
-            # Create logo HTML
-            logo_html = '<div class="logo-container">'
-            if logos and logos.get('company'):
-                logo_html += f'<img src="{logos["company"]}" class="company-logo">'
-            if logos and logos.get('dna'):
-                logo_html += f'<img src="{logos["dna"]}" class="dna-logo">'
-            logo_html += '</div>'
+            # # Extract company and dna logo image tags into separate variables
+            # company_logo = f'<img src="{logos["company"]}" class="company-logo">' if logos and logos.get('company') else ''
+            # dna_img = f'<img src="{logos["dna"]}" class="dna-logo">' if logos and logos.get('dna') else ''
+            
+            company_logo = logos['company'] if logos and 'company' in logos else ''
+            dna_img = logos['dna'] if logos and 'dna' in logos else ''
 
             with open(self.stylesheet) as f:
                 css = f.read()
@@ -98,7 +98,8 @@ class HTMLGenerator:
             # Replace placeholders
             html_content = template.format(
                 css = css,
-                logos=logo_html,
+                dna_img = dna_img,
+                company_logo=company_logo,
                 title=report_data['title'],
                 project=report_data['project'],
                 analysis_type=report_data['analysis_type'],
@@ -106,6 +107,12 @@ class HTMLGenerator:
                 samples=samples_html,
                 templates=templates_html,
                 conclusion=report_data['conclusion'],
+                poi_prj_coord = report_data['coordinator'],
+                poi_ngs_tech = report_data['ngs_tech'],
+                email_prj_coord = report_data['coordinator_email'],
+                email_ngs_tech = report_data['ngs_tech_email'],
+                poi_client_appr = report_data['client_appr'],
+                poi_client_rep = report_data['client_rep'],
                 timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
             # print(html_content)

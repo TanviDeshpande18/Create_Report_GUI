@@ -15,7 +15,7 @@ class LeftPanelWidget(QWidget):
         self.setLayout(layout)
 
         ## Get data from Google Drive
-        project_code_list, sample_name_list, references = gd.main()  # Call the main function from Get_data_left_panel
+        project_code_list, sample_name_list, references, company_poi, client_poi = gd.main()  # Call the main function from Get_data_left_panel
         self.full_sample_list = sample_name_list  # Store full list
 
         # Create heading label with larger font
@@ -82,7 +82,7 @@ class LeftPanelWidget(QWidget):
         # Hide only the checkbox container initially
         self.checkbox_container.hide()
 
-            # Create Report Title section
+        # Create Report Title section
         layout.addSpacing(20) 
         title_label = QLabel("Report Title:")
         self.title_input = QLineEdit()
@@ -92,7 +92,49 @@ class LeftPanelWidget(QWidget):
         # Add title section to layout
         layout.addWidget(title_label)
         layout.addWidget(self.title_input)
-        layout.addSpacing(20)  # Add spacing after title section
+        layout.addSpacing(50)  # Add spacing after title section
+
+        ## Add 4 dropdown plus text input for adding names of all person of interest
+        # Inhouse and client POI
+        # 1. Inhouse POI 1
+        poi1_label = QLabel("Project coordinator")
+        self.poi1_dropdown = QComboBox()
+        self.poi1_dropdown.setEditable(True)
+        self.poi1_dropdown.addItems(['None']+ company_poi)
+        self.poi1_dropdown.setPlaceholderText("Enter or select name...")
+        layout.addWidget(poi1_label)
+        layout.addWidget(self.poi1_dropdown)
+        layout.addSpacing(10)
+
+        # 2. Inhouse POI 2
+        poi2_label = QLabel("NGS Technician")
+        self.poi2_dropdown = QComboBox()
+        self.poi2_dropdown.setEditable(True)
+        self.poi2_dropdown.addItems(['None']+ company_poi)
+        self.poi2_dropdown.setPlaceholderText("Enter or select name...")
+        layout.addWidget(poi2_label)
+        layout.addWidget(self.poi2_dropdown)
+        layout.addSpacing(10)
+
+        # 3. Client POI 1
+        client_poi1_label = QLabel("Project approved by:")
+        self.client_poi1_dropdown = QComboBox()
+        self.client_poi1_dropdown.setEditable(True)
+        self.client_poi1_dropdown.addItems(['None'] + client_poi)
+        self.client_poi1_dropdown.setPlaceholderText("Enter or select name...")
+        layout.addWidget(client_poi1_label)
+        layout.addWidget(self.client_poi1_dropdown)
+        layout.addSpacing(10)
+
+        # 4. Client POI 2
+        client_poi2_label = QLabel("Client representative")
+        self.client_poi2_dropdown = QComboBox()
+        self.client_poi2_dropdown.setEditable(True)
+        self.client_poi2_dropdown.addItems(['None']+ client_poi)
+        self.client_poi2_dropdown.setPlaceholderText("Enter or select name...")
+        layout.addWidget(client_poi2_label)
+        layout.addWidget(self.client_poi2_dropdown)
+        layout.addSpacing(10)
         
         # Add stretch to push widgets to top
         layout.addStretch()
@@ -105,7 +147,7 @@ class LeftPanelWidget(QWidget):
 
     def on_project_changed(self, index):
         project_code = self.project_combo.currentText()
-        print(f"Selected project: {project_code}")
+        # print(f"Selected project: {project_code}")
         
         # Clear existing checkboxes
         for checkbox in self.sample_checkboxes.values():

@@ -58,138 +58,113 @@ class RightPanelHandler:
             print(f"Authentication error: {str(e)}")
             return False
         
+    def get_template_content(self, filename, file_id):
+        """
+        Download and return the content of a template file from Google Drive.
+        """
+        try:
+            # Ensure authentication
+            if not self.drive_service:
+                self.authenticate()
 
-    # def get_latest_file(self):
-    #     """Get the most recent file from the template list folder."""
-    #     try:
-    #         template_list_folder = self.config.get_output_folder_id()
-            
-    #         # Query files in the template list folder, sorted by created time
-    #         files = self.drive_service.files().list(
-    #             q=f"parents='{template_list_folder}' and trashed=false",
-    #             orderBy='createdTime desc',
-    #             pageSize=1,
-    #             fields='files(id, name, createdTime)'
-    #         ).execute().get('files', [])
-            
-    #         if not files:
-    #             print("No template list files found")
-    #             return None
-                
-    #         return files[0]  # Return the most recent file
+            # Get the template folder ID from config
+            template_folder_id = self.config.get_template_folder_id()
 
-    #     except Exception as e:
-    #         print(f"Error getting latest file: {str(e)}")
-    #         return None
+            # Get file metadata
+            file = self.drive_service.files().get(
+                fileId=file_id, 
+                fields='name,mimeType,parents'
+            ).execute()
+
+
+            # Get content based on file type
+            if file['mimeType'] == 'application/vnd.google-apps.document':
+                content = self.drive_service.files().export(
+                    fileId=file_id,
+                    mimeType='text/html'  # Use 'text/html' for formatting, or 'text/plain' for plain text
+                ).execute()
+                text_content = content.decode('utf-8')
+            else:
+                request = self.drive_service.files().get_media(fileId=file_id)
+                file_content = io.BytesIO()
+                downloader = MediaIoBaseDownload(file_content, request)
+                done = False
+                while not done:
+                    _, done = downloader.next_chunk()
+                text_content = file_content.getvalue().decode('utf-8')
+            return text_content
+
+        except Exception as e:
+            print(f"Error downloading template '{filename}': {str(e)}")
+            return None
+
+    def collect_report_data(self,left_panel, middle_panel, right_panel):
+        # Initialize warnings list
+        warnings = []
         
+        # Validate and collect data from left panel
+        report_data = {}
+        
+        # Check project selection
+        project_code = left_panel.project_combo.currentText()
+        if project_code == "None":
+            warnings.append("Please select a project")
+        report_data['project'] = project_code if project_code != "None" else None
+        
+        # Check analysis type
+        if not (left_panel.genome_radio.isChecked() or left_panel.transcriptome_radio.isChecked()):
+            warnings.append("Please select an analysis type")
+        report_data['analysis_type'] = (
+            'Genome' if left_panel.genome_radio.isChecked() 
+            else 'Transcriptome' if left_panel.transcriptome_radio.isChecked()
+            else None
+        )
+        
+        # Check reference
+        reference = left_panel.reference_combo.currentText()
+        report_data['reference'] = reference if reference != "None" else None
+        
+        # Check selected samples
+        selected_samples = [
+            sample for sample, checkbox in left_panel.sample_checkboxes.items()
+            if checkbox.isChecked()
+        ]
+        if not selected_samples:
+            warnings.append("Please select at least one sample")
+        report_data['selected_samples'] = selected_samples
 
-    # def get_file_content(self, file_id):
-    #     """Get content of a file by ID."""
-    #     try:
-    #         content = self.drive_service.files().export(
-    #             fileId=file_id,
-    #             mimeType='text/plain'
-    #         ).execute()
-            
-    #         return content.decode('utf-8')
+        # Check title
+        title = left_panel.title_input.text().strip()
+        if not title:
+            warnings.append("Report title is required")
+        report_data['title'] = title
+        
+        # Check selected templates from middle panel
+        template_content_dict = {}
 
-    #     except Exception as e:
-    #         print(f"Error getting file content: {str(e)}")
-    #         return None
+        if not middle_panel.selected_templates:
+            warnings.append("Please select at least one template")
+        for name, file_id in middle_panel.selected_templates:
+            print(f"Selected template: {name} with ID: {file_id}")
+            template_content_dict[name] = self.get_template_content(name, file_id)
 
-    # def get_template_content(self, template_name):
-    #     """Get content of a Google Doc template by name."""
-    #     try:
-    #         template_folder_id = self.config.get_template_folder_id()
-    #         files = self.drive_service.files().list(
-    #             q=f"name='{template_name}' and parents='{template_folder_id}' and mimeType='application/vnd.google-apps.document' and trashed=false",
-    #             fields='files(id, name, mimeType)'
-    #         ).execute().get('files', [])
-            
-    #         if not files:
-    #             print(f"Template not found: {template_name}")
-    #             return None
-                
-    #         # Get document content as plain text
-    #         content = self.drive_service.files().export(
-    #             fileId=files[0]['id'],
-    #             mimeType='text/plain'
-    #         ).execute()
-            
-    #         return content.decode('utf-8')
+        report_data['templates'] = template_content_dict
+        print(report_data['templates'])
 
-    #     except Exception as e:
-    #         print(f"Error getting template: {str(e)}")
-    #         return None
 
-    # def create_merged_document(self, template_list_id):
-    #     """Create merged document with raw content."""
-    #     try:
-    #         content = self.get_file_content(template_list_id)
-    #         if not content:
-    #             return False
-                
-    #         # Clean template names
-    #         template_names = [name.strip().replace('\ufeff', '') 
-    #                         for name in content.split('\n') 
-    #                         if name.strip()]
-    #         print(f"Template names to process: {template_names}")
-            
-    #         # Create new Google Doc
-    #         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    #         doc_metadata = {
-    #             'name': f'Merged_Report_{timestamp}',
-    #             'mimeType': 'application/vnd.google-apps.document',
-    #             'parents': [self.config.get_finalreport_folder_id()]
-    #         }
-            
-    #         merged_doc = self.drive_service.files().create(
-    #             body=doc_metadata,
-    #             fields='id'
-    #         ).execute()
 
-    #         # Merge all content in one batch
-    #         merged_content = ""
-    #         for template_name in template_names:
-    #             template_content = self.get_template_content(template_name)
-    #             if template_content:
-    #                 merged_content += template_content + "\n\n"
-            
-    #         # Insert all content at once
-    #         if merged_content:
-    #             self.docs_service.documents().batchUpdate(
-    #                 documentId=merged_doc['id'],
-    #                 body={
-    #                     'requests': [{
-    #                         'insertText': {
-    #                             'location': {'index': 1},
-    #                             'text': merged_content
-    #                         }
-    #                     }]
-    #                 }
-    #             ).execute()
-            
-    #         print(f"Created merged document with ID: {merged_doc['id']}")
-    #         return merged_doc['id']  # Return document ID instead of True
+        # Add conclusion to report data
+        report_data['conclusion'] = middle_panel.conclusion_text.toPlainText()
 
-    #     except Exception as e:
-    #         print(f"Error creating merged document: {str(e)}")
-    #         return False
-    
-# def main():
-#     """Test the RightPanelHandler functionality."""
-#     handler = RightPanelHandler()
-#     if handler.authenticate():
-#         print("Authentication successful")
-#         latest_file = handler.get_latest_file()
-#         if latest_file:
-#             print(f"Processing template list: {latest_file['name']}")
-#             if handler.create_merged_document(latest_file['id']):
-#                 print("Document merged successfully!")
-#             else:
-#                 print("Failed to merge document")
-#     else:
-#         print("Authentication failed")
+        # Add POI inhouse and client data
+        tmp = left_panel.poi1_dropdown.currentText()
+        report_data['coordinator'] = tmp.split('(')[0]
+        report_data['coordinator_email'] = tmp.split('(')[1].strip(')')
+        tmp = left_panel.poi2_dropdown.currentText()
+        report_data['ngs_tech'] = tmp.split('(')[0]
+        report_data['ngs_tech_email'] = tmp.split('(')[1].strip(')')      
 
-# if __name__ == '__main__':
-#     main()
+        report_data['client_appr'] = left_panel.client_poi1_dropdown.currentText()
+        report_data['client_rep'] = left_panel.client_poi2_dropdown.currentText()
+
+        return report_data, warnings

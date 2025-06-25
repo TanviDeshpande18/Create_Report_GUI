@@ -53,7 +53,6 @@ class MiddlePanelWidget(QWidget):
         heading_label = QLabel("Select Templates for Report")
         heading_label.setStyleSheet("font-size: 14pt; font-weight: bold;")
         header_layout.addWidget(heading_label)
-        header_layout.addStretch()  # Add stretch to push button to right
     
         # Add header layout to main layout
         layout.addLayout(header_layout)

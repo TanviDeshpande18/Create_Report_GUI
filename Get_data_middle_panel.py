@@ -46,7 +46,7 @@ class TemplateHandler:
         try:
             # Get template folder ID from config
             folder_id = self.config.get_template_folder_id()
-            print(f"Template Folder ID: {folder_id}")
+            # print(f"Template Folder ID: {folder_id}")
             
             # Query for documents in the folder
             query = (
@@ -65,12 +65,6 @@ class TemplateHandler:
             ).execute()
             
             files = results.get('files', [])
-            if not files:
-                print("No template files found.")
-            else:
-                print(f"Found {len(files)} template files:")
-                for file in files:
-                    print(f"- {file['name']} ({file['mimeType']})")
                     
             return files
             

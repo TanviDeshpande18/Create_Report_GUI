@@ -50,7 +50,7 @@ class DriveDataHandler:
         """Get all files from configured folder."""
         try:
             folder_id = self.config.get_main_folder_id()
-            print(f"Folder ID: {folder_id}")
+            # print(f"Folder ID: {folder_id}")
             
             query = f"parents='{folder_id}' and trashed=false"
             
@@ -62,13 +62,6 @@ class DriveDataHandler:
             ).execute()
             
             files = results.get('files', [])
-            if not files:
-                print("No files found in the specified folder.")
-            else:
-                print(f"Found {len(files)} files:")
-                for file in files:
-                    print(f"- {file['name']} (Type: {file['mimeType']})")
-            print(files)  
             return files
             
         except Exception as e:
@@ -93,10 +86,6 @@ class DriveDataHandler:
             # Get file metadata
             file_metadata = self.service.files().get(fileId=file_id).execute()
             mime_type = file_metadata['mimeType']
-
-            if not self.is_excel_file(mime_type):
-                print(f"File {file_metadata['name']} is not a spreadsheet")
-                return None
 
             # Create file stream
             file_stream = io.BytesIO()
@@ -131,6 +120,8 @@ def main():
     project_code_list = []
     sample_name_list = []
     references = []
+    poi_epidote_list = []
+    poi_client_list = []
     
     handler = DriveDataHandler()
     if handler.authenticate():
@@ -154,10 +145,15 @@ def main():
                         # Assuming references are in a column named 'Reference'
                         if 'References' in df.columns:
                             references.extend(df['References'].tolist())
-            else:
-                print(f"\nSkipping non-Excel file: {file['name']}")
-        
-        return project_code_list, sample_name_list, references
+
+                    elif 'poi' in file['name'].lower():
+                        for i,row in df.iterrows():
+                            if row['company'].lower() == 'epidote':
+                                poi_epidote_list.append(row['Person'] + ' (' + row['email'] +')')
+                            elif row['company'].lower() == 'client':
+                                poi_client_list.append(row['Person'])            
+
+        return project_code_list, sample_name_list, references,poi_epidote_list, poi_client_list
 
 
 
