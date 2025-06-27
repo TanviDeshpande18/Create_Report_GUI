@@ -64,6 +64,18 @@ class HTMLGenerator:
         except Exception as e:
             print(f"Error downloading logo {file['name']}: {str(e)}")
             return None
+        
+    def create_template_content_html(self, template_dict):
+        templates_html = ""
+
+        for i, content in template_dict.items():
+            content = content.replace('\n', '<br>')  # Convert newlines to <br> for HTML
+            templates_html += f"<div class='template-block'>\n"
+            # templates_html += f"<h2>{name}</h2>\n"
+            templates_html += content  # assuming html_content is safe HTML
+            templates_html += "</div>\n"
+
+        return templates_html
 
 
 
@@ -79,21 +91,16 @@ class HTMLGenerator:
             
             # Format samples and templates lists
             samples_html = '\n'.join([f'<a>{sample}</a>' for sample in report_data['selected_samples']])
-            templates_html = '\n'.join([f'<a>{t["name"]}</a>' for t in report_data['templates']])
-
-
-            # # Extract company and dna logo image tags into separate variables
-            # company_logo = f'<img src="{logos["company"]}" class="company-logo">' if logos and logos.get('company') else ''
-            # dna_img = f'<img src="{logos["dna"]}" class="dna-logo">' if logos and logos.get('dna') else ''
             
+            #Get template html content with assigned div for html
+            templates_html = self.create_template_content_html(report_data['template_content_dict'])
+
+            # Get company and DNA logos
             company_logo = logos['company'] if logos and 'company' in logos else ''
             dna_img = logos['dna'] if logos and 'dna' in logos else ''
 
             with open(self.stylesheet) as f:
                 css = f.read()
-
-            # print(css)
-            # print(type(css))
 
             # Replace placeholders
             html_content = template.format(

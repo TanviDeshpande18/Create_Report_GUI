@@ -49,8 +49,8 @@ class RightPanelWidget(QWidget):
         
     def init_ui(self):
         # Create main layout once
-        self.main_layout = QVBoxLayout()
-        self.setLayout(self.main_layout)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
 
         # Create top header container
         header_layout = QHBoxLayout()
@@ -116,8 +116,20 @@ class RightPanelWidget(QWidget):
         # header_layout.addWidget(self.export_docx_btn)
       
         # Add header to main layout
-        self.main_layout.addLayout(header_layout)
-        self.main_layout.addSpacing(20)
+        layout.addLayout(header_layout)
+        layout.addSpacing(20)
+
+        # Add conclusion section
+        conclusion_group = QGroupBox("Conclusion")
+        conclusion_layout = QVBoxLayout()
+        
+        self.conclusion_text = QTextEdit()
+        self.conclusion_text.setPlaceholderText("Enter your conclusion here...")
+        self.conclusion_text.setMinimumHeight(50)
+        conclusion_layout.addWidget(self.conclusion_text)
+        
+        conclusion_group.setLayout(conclusion_layout)
+        layout.addWidget(conclusion_group)   
 
         # # Create preview group box with scroll area
         # preview_group = QGroupBox("Document Content")
@@ -192,7 +204,7 @@ class RightPanelWidget(QWidget):
             right_panel = main_window.findChild(QWidget, "right_panel")
 
             report_data, warnings = self.handler.collect_report_data(left_panel, middle_panel, right_panel)
-                     
+                        
             # If there are warnings, show them and return None
             if warnings:
                 QMessageBox.warning(
@@ -218,7 +230,7 @@ class RightPanelWidget(QWidget):
         # Get HTML content and report data
         html_content = self.get_data_and_html_content()
 
-        # if html_content:
+        if html_content:
             # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             # # Prepare in-memory file for upload
             # html_bytes = io.BytesIO(html_content.encode('utf-8'))
@@ -250,14 +262,14 @@ class RightPanelWidget(QWidget):
             # )
 
             # Serve HTML safely
-        #     serve_html.serve_html_safely(html_content)
+            serve_html.serve_html_safely(html_content)
 
-        # else:
-        #     QMessageBox.critical(
-        #         self,
-        #         "Error",
-        #         "Failed to generate HTML content"
-        #     )
+        else:
+            QMessageBox.critical(
+                self,
+                "Error",
+                "Failed to generate HTML content"
+            )
 
 
 

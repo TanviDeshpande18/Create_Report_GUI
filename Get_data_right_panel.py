@@ -81,7 +81,7 @@ class RightPanelHandler:
             if file['mimeType'] == 'application/vnd.google-apps.document':
                 content = self.drive_service.files().export(
                     fileId=file_id,
-                    mimeType='text/html'  # Use 'text/html' for formatting, or 'text/plain' for plain text
+                    mimeType='text/plain'  # Use 'text/html' for formatting, or 'text/plain' for plain text
                 ).execute()
                 text_content = content.decode('utf-8')
             else:
@@ -92,6 +92,7 @@ class RightPanelHandler:
                 while not done:
                     _, done = downloader.next_chunk()
                 text_content = file_content.getvalue().decode('utf-8')
+            # print(text_content)
             return text_content
 
         except Exception as e:
@@ -144,25 +145,35 @@ class RightPanelHandler:
 
         if not middle_panel.selected_templates:
             warnings.append("Please select at least one template")
-        for name, file_id in middle_panel.selected_templates:
-            print(f"Selected template: {name} with ID: {file_id}")
-            template_content_dict[name] = self.get_template_content(name, file_id)
+        
+        selected_template_label_text = middle_panel.sel_template_label.text().split('<br>')
+        # print(selected_template_label_text)
+        template_id_dict = {name: file_id for name, file_id in middle_panel.selected_templates}
+        for i in range(len(selected_template_label_text)):
+            name = selected_template_label_text[i]
+            file_id = template_id_dict[name]
+            # print(name)
+            template_content_dict[i+1] = self.get_template_content(name, file_id)
 
-        report_data['templates'] = template_content_dict
-        print(report_data['templates'])
-
+        # print(template_content_dict.keys())
+        report_data['template_content_dict'] = template_content_dict
+        # print(report_data['templates'])
 
 
         # Add conclusion to report data
-        report_data['conclusion'] = middle_panel.conclusion_text.toPlainText()
+        report_data['conclusion'] = right_panel.conclusion_text.toPlainText()
 
         # Add POI inhouse and client data
+        report_data['coordinator'],report_data['coordinator_email'],report_data['ngs_tech'],report_data['ngs_tech_email']="","","",""
+        report_data['client_appr'],report_data['client_rep']="",""
         tmp = left_panel.poi1_dropdown.currentText()
-        report_data['coordinator'] = tmp.split('(')[0]
-        report_data['coordinator_email'] = tmp.split('(')[1].strip(')')
+        if tmp != "None":
+            report_data['coordinator'] = tmp.split('(')[0]
+            report_data['coordinator_email'] = tmp.split('(')[1].strip(')')
         tmp = left_panel.poi2_dropdown.currentText()
-        report_data['ngs_tech'] = tmp.split('(')[0]
-        report_data['ngs_tech_email'] = tmp.split('(')[1].strip(')')      
+        if tmp != "None":
+            report_data['ngs_tech'] = tmp.split('(')[0]
+            report_data['ngs_tech_email'] = tmp.split('(')[1].strip(')')
 
         report_data['client_appr'] = left_panel.client_poi1_dropdown.currentText()
         report_data['client_rep'] = left_panel.client_poi2_dropdown.currentText()

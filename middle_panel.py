@@ -63,14 +63,14 @@ class MiddlePanelWidget(QWidget):
         template_group_layout = QVBoxLayout()
         template_group.setLayout(template_group_layout)
         template_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        template_group.setMinimumHeight(int(self.height() * 1.2))  
+        template_group.setMinimumHeight(int(self.height() * 1.1))  
 
         
         # Create scroll area
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll_area.setFixedHeight(int(self.height() * 1.2))
+        scroll_area.setFixedHeight(int(self.height() * 1.1))
 
         # Create container for templates
         self.template_container = QWidget()
@@ -97,16 +97,20 @@ class MiddlePanelWidget(QWidget):
 
 
         # Add conclusion section
-        conclusion_group = QGroupBox("Conclusion")
-        conclusion_layout = QVBoxLayout()
+        sel_template_group = QGroupBox("Selected Templates")
+        sel_template_layout = QVBoxLayout()
+
+        # Add descriptive label
+        desc_label = QLabel("Below are the templates you have selected. Their order determines how they will appear in the report:")
+        sel_template_layout.addWidget(desc_label)
         
-        self.conclusion_text = QTextEdit()
-        self.conclusion_text.setPlaceholderText("Enter your conclusion here...")
-        self.conclusion_text.setMinimumHeight(50)
-        conclusion_layout.addWidget(self.conclusion_text)
+        self.sel_template_label = QLabel()
+        self.sel_template_label.setWordWrap(True)
+        self.sel_template_label.setStyleSheet("background: #f5f5f5; padding: 8px; min-height: 40px;")
+        sel_template_layout.addWidget(self.sel_template_label)
         
-        conclusion_group.setLayout(conclusion_layout)
-        layout.addWidget(conclusion_group)   
+        sel_template_group.setLayout(sel_template_layout)
+        layout.addWidget(sel_template_group)   
         
         # Add stretch to push widgets to top
         layout.addStretch()
@@ -169,12 +173,12 @@ class MiddlePanelWidget(QWidget):
         checkbox = self.sender()
         if state:  # Checked
             self.selected_templates.append((checkbox.text(), checkbox.objectName()))
-            self.show_template_preview(checkbox.text(), checkbox.objectName())
+            # self.show_template_preview(checkbox.text(), checkbox.objectName())
         else:  # Unchecked
             self.selected_templates = [t for t in self.selected_templates 
                                      if t[1] != checkbox.objectName()]
-        print(f"Template '{checkbox.text()}' {'selected' if state else 'unselected'}")
-
+        selected_names = [name for name, _ in self.selected_templates]
+        self.sel_template_label.setText('<br>'.join(selected_names))
 
 
 if __name__ == '__main__':
