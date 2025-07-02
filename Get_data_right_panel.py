@@ -146,8 +146,14 @@ class RightPanelHandler:
         if not middle_panel.selected_templates:
             warnings.append("Please select at least one template")
         
+
+        ## Get the order of templates from the printed list as per user selection on middle panel
         selected_template_label_text = middle_panel.sel_template_label.text().split('<br>')
         # print(selected_template_label_text)
+
+        # Create a dictionary to map template names to their file IDs
+        # from the above order of templates, get ID for each template and get content to create dictionary
+        # dictionary contains template order number as key and content as value
         template_id_dict = {name: file_id for name, file_id in middle_panel.selected_templates}
         for i in range(len(selected_template_label_text)):
             name = selected_template_label_text[i]
