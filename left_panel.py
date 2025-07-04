@@ -24,6 +24,15 @@ class LeftPanelWidget(QWidget):
         layout.addWidget(heading_label)
         layout.addSpacing(20)
 
+        # Create Report type dropdown section
+        report_label = QLabel("Report Type:")
+        self.report_combo = QComboBox()
+        self.report_combo.addItems(["None","DNA Genome Integrity", "Adventitious Agent Detection","PhiX Validation"])
+        
+        # Add spacing after project section
+        layout.addWidget(report_label)
+        layout.addWidget(self.report_combo)
+        layout.addSpacing(20)  # Add 20 pixels of vertical spacing
 
         # Create Project Code dropdown section
         project_label = QLabel("Select Project Code:")

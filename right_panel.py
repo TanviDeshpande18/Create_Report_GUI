@@ -7,7 +7,9 @@ from PyQt5.QtCore import Qt, QMarginsF
 from PyQt5.QtGui import QTextDocument
 from config_handler import ConfigHandler
 from Get_data_right_panel import RightPanelHandler
-from html_generator import HTMLGenerator
+from Create_Report_GUI.dnagenome_integrity_html_generator import DNAGI_HTMLGenerator
+from Create_Report_GUI.adventitious_html_generator import AD_HTMLGenerator
+from Create_Report_GUI.validation_html_generator import VAL_HTMLGenerator
 import serve_html_content as serve_html
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 import io
@@ -42,7 +44,11 @@ class RightPanelWidget(QWidget):
         super().__init__(parent)
         self.init_ui()
         self.setObjectName("right_panel") 
-        self.html_generator = HTMLGenerator()
+        # Initialize HTML generators
+        self.dnagi_html_generator = DNAGI_HTMLGenerator()  # Default to DNA Genome Integrity
+        self.ad_html_generator = AD_HTMLGenerator()
+        self.val_html_generator = VAL_HTMLGenerator()
+
         self.handler = RightPanelHandler()
         # Initialize handler after UI
         self.config_handler = ConfigHandler()
@@ -214,8 +220,20 @@ class RightPanelWidget(QWidget):
                 )
                 return None          
         
-            # Generate HTML content            
-            html_content = self.html_generator.generate_html(report_data)
+            # Generate HTML content 
+            if report_data['report_type'] == "DNA Genome Integrity":
+                html_content = self.dnagi_html_generator.generate_html(report_data)
+            elif report_data['report_type'] == "Adventitious Agent Detection":
+                html_content = self.ad_html_generator.generate_html(report_data)
+            elif report_data['report_type'] == "PhiX Validation":        
+                html_content = self.val_html_generator.generate_html(report_data)
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    "Please select a valid report type"
+                )
+                return None
 
             return html_content
 

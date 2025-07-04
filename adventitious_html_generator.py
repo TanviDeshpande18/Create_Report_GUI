@@ -6,10 +6,10 @@ from io import BytesIO
 from googleapiclient.http import MediaIoBaseDownload
 from Get_data_middle_panel import TemplateHandler
 
-class HTMLGenerator:
+class AD_HTMLGenerator:
     def __init__(self):
-        self.template_path = os.path.join(os.path.dirname(__file__), 'templates/report_template.html')
-        self.stylesheet = os.path.join(os.path.dirname(__file__), 'static/style.css')
+        self.template_path = os.path.join(os.path.dirname(__file__), 'templates/adventitious_report_template.html')
+        self.stylesheet = os.path.join(os.path.dirname(__file__), 'static/ad_style.css')
         self.handler = TemplateHandler()
         if not self.handler.authenticate():
             raise Exception("Authentication failed")
@@ -185,8 +185,6 @@ class HTMLGenerator:
             
             #Get template html content with assigned div for html
             templates_html = self.create_template_content_html(report_data['template_content_dict'],company_logo)
-
-
 
             with open(self.stylesheet) as f:
                 css = f.read()

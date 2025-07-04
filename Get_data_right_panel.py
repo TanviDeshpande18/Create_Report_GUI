@@ -105,6 +105,13 @@ class RightPanelHandler:
         
         # Validate and collect data from left panel
         report_data = {}
+
+        # Check report type
+        report_type = left_panel.report_combo.currentText()
+        if report_type == "None":
+            warnings.append("Please select a Report Type")
+        report_data['report_type'] = report_type if report_type != "None" else None
+
         
         # Check project selection
         project_code = left_panel.project_combo.currentText()

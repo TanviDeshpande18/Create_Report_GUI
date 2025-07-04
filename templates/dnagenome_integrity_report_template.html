@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- <title>Two Column Flexbox</title> -->
+</head>
+<style>
+ {css}
+</style>
+<body>
+  <div class="a4-container-title">
+    <div class="flex-columns">
+      <div class="column1">
+         <img src="{dna_img}" alt="Sample Image 1" class="dna">
+      </div>
+      <div class="column2">
+          <div class="column2-top">
+            <img src="{company_logo}" alt="Sample Image 2" class="logo">
+          </div>
+          <div class="column2-middle">          
+            <h1 style="font-weight: normal;" class="title">{title}</h1>
+          </div>
+          <div class="column2-bottom">
+            <h4 class="samples">Samples included in this report :</h4>
+            {samples}
+          </div>
+      </div>
+      <div class="column3">
+        <a class="clpoi1_header">Project approved by: </a>
+        <a class="clpoi1_name">{poi_client_appr}</a>
+      </div>
+      <div class="column4">
+        <a class="poi1_header">NGS Technician</a>
+        <a class="poi1_name">{poi_ngs_tech}</a>
+        <a class="poi1_email">{email_ngs_tech}</a>
+      </div>
+      <div class="column5">
+        <a class="clpoi2_header">Client representative</a>
+        <a class="clpoi2_name">{poi_client_rep}</a>
+      </div>
+      <div class="column6">
+        <a class="poi2_header">Project coordinator</a>
+        <a class="poi2_name">{poi_prj_coord}</a>
+        <a class="poi2_email">{email_prj_coord}</a>
+      </div>
+      <div class="column7">
+        <a style="color: gray; font-size:16px;padding-top: 5px;">All NGS related procedures and subsequent analysis performed by Epidote Healthcare. All the information in this report is accurate.</a>
+      </div>
+    </div>
+  </div>
+  {templates}
+
+
+</body>
+
+
+
+</html>
