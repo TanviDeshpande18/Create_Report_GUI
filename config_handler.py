@@ -55,3 +55,11 @@ class ConfigHandler:
                 config = json.load(f)
                 return config.get('logo_folder_id')
         raise FileNotFoundError("folder_config.json not found in configs directory")
+    
+    def get_validation_data_folder_id(self):
+        """Get logo folder ID from config."""
+        if os.path.exists(self.folder_config_path):
+            with open(self.folder_config_path, 'r') as f:
+                config = json.load(f)
+                return config.get('validation_data_folder_id')
+        raise FileNotFoundError("folder_config.json not found in configs directory")

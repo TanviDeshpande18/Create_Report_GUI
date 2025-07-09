@@ -148,28 +148,29 @@ class RightPanelHandler:
         report_data['title'] = title
         
         # Check selected templates from middle panel
-        template_content_dict = {}
-
-        if not middle_panel.selected_templates:
-            warnings.append("Please select at least one template")
-        
+        template_content_dict = {}       
 
         ## Get the order of templates from the printed list as per user selection on middle panel
         selected_template_label_text = middle_panel.sel_template_label.text().split('<br>')
         # print(selected_template_label_text)
 
         # Create a dictionary to map template names to their file IDs
+        # ID is obtained from user selected checkbox field in middle panel
         # from the above order of templates, get ID for each template and get content to create dictionary
         # dictionary contains template order number as key and content as value
-        template_id_dict = {name: file_id for name, file_id in middle_panel.selected_templates}
-        for i in range(len(selected_template_label_text)):
-            name = selected_template_label_text[i]
-            file_id = template_id_dict[name]
-            # print(name)
-            template_content_dict[i+1] = self.get_template_content(name, file_id)
+        try:
+            template_id_dict = {name: file_id for name, file_id in middle_panel.selected_templates}
+            # print(template_id_dict)
+            for i in range(len(selected_template_label_text)):
+                name = selected_template_label_text[i]
+                file_id = template_id_dict[name]
+                # print(name)
+                template_content_dict[i+1] = self.get_template_content(name, file_id)
 
-        # print(template_content_dict.keys())
-        report_data['template_content_dict'] = template_content_dict
+            # print(template_content_dict.keys())
+            report_data['template_content_dict'] = template_content_dict
+        except:
+            report_data['template_content_dict'] = {}
         # print(report_data['templates'])
 
 

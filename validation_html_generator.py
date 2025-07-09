@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 import math
 import base64
+import json
 from io import BytesIO
 from googleapiclient.http import MediaIoBaseDownload
 from Get_data_middle_panel import TemplateHandler
@@ -46,6 +47,44 @@ class VAL_HTMLGenerator:
         except Exception as e:
             print(f"Error getting logos: {str(e)}")
             return None
+        
+    def get_data_images(self, project_name):
+        try:
+            valdata_folder = self.handler.config.get_validation_data_folder_id()
+            data_images = {}
+            
+            # Query for both logos
+            query = f"parents='{valdata_folder}' and mimeType contains 'image/' and trashed=false"
+            results = self.handler.service.files().list(
+                q=query,
+                fields="files(id, name, mimeType)",
+                pageSize=10
+            ).execute()
+            
+            files = results.get('files', [])
+            if not files:
+                print("No logos found in logo folder")
+                return None
+            
+            # print("IMAGE FILES", files)
+            # Find specific logos by name
+            for file in files:
+                if file['name'].lower().startswith(project_name.lower()):
+                    if 'adapter_content' in file['name'].lower():
+                        data_images['adapter_content'] = self._download_logo(file)
+                    elif 'average_base_calling_accuracy' in file['name'].lower():
+                        data_images['average_base_calling_accuracy'] = self._download_logo(file)
+                    elif 'basecoverage' in file['name'].lower():
+                        data_images['basecoverage'] = self._download_logo(file)
+                    elif 'per_base_quality' in file['name'].lower():
+                        data_images['per_base_quality'] = self._download_logo(file)
+            
+            return data_images
+            
+        except Exception as e:
+            print(f"Error getting logos: {str(e)}")
+            return None
+        
 
     def _download_logo(self, file):
         """Helper method to download and convert logo to base64."""
@@ -64,106 +103,22 @@ class VAL_HTMLGenerator:
             
         except Exception as e:
             print(f"Error downloading logo {file['name']}: {str(e)}")
+            return None        
+
+    def read_validation_json(self, file_id):
+        try:
+            request = self.handler.service.files().get_media(fileId=file_id)
+            fh = BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+            fh.seek(0)
+            data = json.load(fh)
+            return data
+        except Exception as e:
+            print(f"Error reading JSON from Drive: {e}")
             return None
-        
-    def create_template_content_html(self, template_dict, company_logo):
-        #Below are variables used to calcultae how many lines fit on a page
-        #Bigger line take up more rows of html, to take that into account. we need to see how many characters fit on a line
-        lines_fit_on_1_page = 40
-        characters_on_1_line = 72
-        next_section_continue_cutoff = 30
-        templates_html = ""
-
-        def add_header_logo():
-            template = "<div class='a4-container'>\n \
-                        <div class='flex-rows'>\n \
-                        <div class='page-header'>\n"
-            template += f"<img src='{company_logo}' alt='Sample Image 2' class='logo-header'>\n \
-                        </div>"
-
-            return template
-        
-        def add_footer():
-            template = "<div class='page-footer'>\n \
-                        <p style='color: gray; text-align: right;'>2020 Epidote Healthcare LLP </p>\n \
-                        </div>"
-            return template
-        
-        current_line = 0
-        # print("TEMPLATE DICT", template_dict)
-        # Iterate through the template dictionary
-        # template_dict is expected to be a dictionary with keys as template numbers and values as content
-        # Each content is expected to be a string with the first line as title and the rest as text body
-        if len(template_dict) != 0:
-            for i, content in template_dict.items():
-                content = content.strip().splitlines()  # Clean up whitespace and newlines and split into lines            
-                title,text_body = content[0].replace("Title: ", ""), content[1:]
-                # print("TITLE", title)
-                # print("TEXT BODY", text_body)
-                # text_body = text_body.replace('\n', '<br>')  # Convert newlines to <br> for HTML
-                if i == 1:
-                    templates_html += add_header_logo()
-                    templates_html += "<div class='page-body'>\n"
-                else:
-                    # Check how much space is left on the page, if there are only few lines, go to next page
-                    if current_line >= next_section_continue_cutoff:
-                        # close current template block and page body
-                        templates_html += "</div>\n</div>\n"
-                        templates_html += add_footer()
-                        # Close flex-rows and a4-container divs
-                        templates_html += "</div>\n</div>\n"
-                        templates_html += add_header_logo()
-                        templates_html += "<div class='page-body'>\n"
-                        current_line = 0  
-                    else:
-                        # Close template block of previous template
-                        templates_html += "</div>\n"
-
-                # Add title
-                templates_html += "<div class='template-title'>\n"
-                templates_html += f"<h3>{title}</h3>\n"
-                templates_html += "</div>\n"
-                current_line += 1
-
-
-                # Add line by line text body
-                templates_html += "<div class='template-block'>\n"
-                for line in text_body:
-
-                    if line.strip() == "":
-                        current_line += 1  # Empty line counts as a line
-                    else:
-                        ## Here you need to add a check if the next line that you are adding will fit the remaining space on the page
-                        # Need to calculate math.ceil(len(line) / characters_on_1_line) to see how many lines it will take
-                        # if more than remaining lines, go to next page
-                        space_needed = math.ceil(len(line) / characters_on_1_line)
-                        if current_line + space_needed < lines_fit_on_1_page:       
-                            # If it fits, add the line
-                            current_line += space_needed  
-                        else:
-                            # close current template block and page body
-                            templates_html += "</div>\n</div>\n"
-                            templates_html += add_footer()
-                            # Close flex-rows and a4-container divs
-                            templates_html += "</div>\n</div>\n"
-                            templates_html += add_header_logo()
-                            templates_html += "<div class='page-body'>\n"
-                            templates_html += "<div class='template-block'>\n"
-                            current_line = 0    
-                    templates_html += f"<p>{line}</p>\n"
-                templates_html += "<br><br>"
-                current_line += 2
-
-            #Close the last template block and page body
-            templates_html += "</div>\n</div>\n"
-            templates_html += add_footer()
-            # Close flex-rows and a4-container divs
-            templates_html += "</div>\n</div>\n"
-    
-
-        # print(templates_html)
-        return templates_html
-
 
 
     def generate_html(self, report_data):
@@ -171,6 +126,10 @@ class VAL_HTMLGenerator:
         try:
             # Get both logos
             logos = self.get_logos()
+            data_images = self.get_data_images(report_data['project'])
+
+            # Get validation json data
+            validation_json_data = self.read_validation_json(str(report_data['project']) + '_validation_data.json')
 
             # Read template
             with open(self.template_path, 'r', encoding='utf-8') as f:
@@ -182,9 +141,13 @@ class VAL_HTMLGenerator:
             # Get company and DNA logos
             company_logo = logos['company'] if logos and 'company' in logos else ''
             dna_img = logos['dna'] if logos and 'dna' in logos else ''
+
+            # Get data images
+            adapter_content_img = data_images['adapter_content'] if data_images and 'adapter_content' in data_images else ''
+            average_base_calling_accuracy_img = data_images['average_base_calling_accuracy'] if data_images and 'average_base_calling_accuracy' in data_images else ''
+            basecoverage_img = data_images['basecoverage'] if data_images and 'basecoverage' in data_images else ''
+            per_base_quality_img = data_images['per_base_quality'] if data_images and 'per_base_quality' in data_images else '' 
             
-            #Get template html content with assigned div for html
-            templates_html = self.create_template_content_html(report_data['template_content_dict'],company_logo)
 
             with open(self.stylesheet) as f:
                 css = f.read()
@@ -194,12 +157,17 @@ class VAL_HTMLGenerator:
                 css = css,
                 dna_img = dna_img,
                 company_logo=company_logo,
+                adapter_content_img=adapter_content_img,
+                average_base_calling_accuracy_img=average_base_calling_accuracy_img,
+                basecoverage_img=basecoverage_img,
+                per_base_quality_img=per_base_quality_img,
+                
                 title=report_data['title'],
                 project=report_data['project'],
                 analysis_type=report_data['analysis_type'],
                 reference=report_data['reference'] or 'None',
                 samples=samples_html,
-                templates=templates_html,
+                # templates=templates_html,
                 conclusion=report_data['conclusion'],
                 poi_prj_coord = report_data['coordinator'],
                 poi_ngs_tech = report_data['ngs_tech'],

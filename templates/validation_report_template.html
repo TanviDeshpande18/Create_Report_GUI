@@ -48,9 +48,120 @@
       </div>
     </div>
   </div>
-  {templates}
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>NextSeq 550 run details:</h2><br></div>
+        <div class='template-block'>
+          <h2>Run #:</h2><br>
+          <h2>Flow cell #:</h2><br>
+          <h2>Run date: </h2><br>
+          <h2>Technician:</h2><br>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">2</p>
+      </div>
+    </div>
+  </div>
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Validation parameters of NGS accuracy</h2></div>
+
+        <div class='template-block'>
+          <p>An internal positive control of ɸx174 phage DNA is sequenced along with the user provided samples. Since this is a sample with a known DNA sequence, the following measurements are carried out</p>
+          <ol>
+            <li>Per base sequencing quality as assigned by the instrument</li>
+            <li>Per base sequencing accuracy calculated independently</li>
+            <li>Per base sequencing coverage calculated independently</li>
+          </ol>
+          <p>ɸx174 is a synthetic internal positive control on the Illumina NextSeq 550 platform. It is provided by the manufacturer for this specific purpose. The product details can be found here: <a href="https://sapac.illumina.com/products/by-type/sequencing-kits/cluster-gen-sequencing-reagents/phix-control-v3.html">PhiX Sequence internal control V3</a></p>
+          <p>The product used has the catalogue # : FC-110-3001</p>
+          <p>Details of generation of sample and sequencing statistics are provided overleaf.</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">3</p>
+      </div>
+    </div>
+  </div>
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Sequencing statistics of spike in sample</h2></div>
+        <div class='template-block'>
+          <p>We included a ɸx174 phage DNA as a spike in control at 1% of the sample library amount in picograms.</p>
+          <p>The synthetic spike in control has no index and thus can not be demultiplexed spuriously into any data belonging to any experimental sample in the run. The ‘fastq’ reads that belong to the ɸx174 phage DNA are thus obtained as an insulated dataset and thus this analysis is independently performed without the possibility of admixture with the samples.</p><br>
+          <p>The sequencing statistics for the ɸx174 data are as follows:</p>
+          <br>
+          <table class="table1">
+            <thead> 
+              <tr>
+                <th>Sample Name</th>
+                <th>Genome size in Kb</th>
+                <th>Number of bases sequenced in Mb</th>
+                <th>X Coverage of sequenced data</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ɸx174</td>
+                <td>5.386</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>Genome size is based on the reference sequence NCBI accession # NC_001422.1</p>
+
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">4</p>
+      </div>
+    </div>
+  </div>
 
 
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Sequencing quality - per base quality </h2></div>
+        <div class='template-block'>
+          <p>The Illumina NextSeq 550 assigns a quality score to every read.</p>
+          <p>This is an estimation of the accuracy of base calling while performing the sequencing by synthesis reaction in the flow-cell. This value is measured by the instrument while reading every synthesis reaction.</p>
+          <p>The quality values are reported along with the data. The values are extracted from the data using a tool called fastqc.</p>
+
+          <img src='per_base_quality_img' alt='Per base quality plot' class='per-base-quality'>
+          <p>Figure 1: Per base sequencing quality</p><br>   
+          <p>This figure shows the per base sequencing quality of the reads as calculated using the as per the Illumina standard as defined <a href="https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/quality-scores.html#:~:text=What%20is%20a%20Quality%20Score,developed%20for%20Sanger%20sequencing%20experiments.">here</a></p>
+          <p>The figure depicts average per base sequencing quality as a boxplot of values at each base in the read. This serves as a guide for pre-processing of the reads for quality filtration and read trimming.</p>
+          <p>A phred33 score over 30 implies a base call accuracy of 99.9%. For all the positions, 90% of the reads have a quality score above Q30 and thus pass the QC check for further analysis</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">5</p>
+      </div>
+    </div>
+  </div>
 </body>
 
 

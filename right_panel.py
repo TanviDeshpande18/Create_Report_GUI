@@ -7,9 +7,9 @@ from PyQt5.QtCore import Qt, QMarginsF
 from PyQt5.QtGui import QTextDocument
 from config_handler import ConfigHandler
 from Get_data_right_panel import RightPanelHandler
-from Create_Report_GUI.dnagenome_integrity_html_generator import DNAGI_HTMLGenerator
-from Create_Report_GUI.adventitious_html_generator import AD_HTMLGenerator
-from Create_Report_GUI.validation_html_generator import VAL_HTMLGenerator
+from dnagenome_integrity_html_generator import DNAGI_HTMLGenerator
+from adventitious_html_generator import AD_HTMLGenerator
+from validation_html_generator import VAL_HTMLGenerator
 import serve_html_content as serve_html
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 import io
@@ -202,47 +202,47 @@ class RightPanelWidget(QWidget):
 
     def get_data_and_html_content(self):
         """Collect report data from both panels and validate."""
-        try:
-            # Get the main window and find left panel
-            main_window = self.window()  # Get the top-level window
-            left_panel = main_window.findChild(QWidget, "left_panel")
-            middle_panel = main_window.findChild(QWidget, "middle_panel")
-            right_panel = main_window.findChild(QWidget, "right_panel")
+        # try:
+        # Get the main window and find left panel
+        main_window = self.window()  # Get the top-level window
+        left_panel = main_window.findChild(QWidget, "left_panel")
+        middle_panel = main_window.findChild(QWidget, "middle_panel")
+        right_panel = main_window.findChild(QWidget, "right_panel")
 
-            report_data, warnings = self.handler.collect_report_data(left_panel, middle_panel, right_panel)
-                        
-            # If there are warnings, show them and return None
-            if warnings:
-                QMessageBox.warning(
-                    self,
-                    "Validation Error",
-                    "Please fix the following issues:\n• " + "\n• ".join(warnings)
-                )
-                return None          
-        
-            # Generate HTML content 
-            if report_data['report_type'] == "DNA Genome Integrity":
-                html_content = self.dnagi_html_generator.generate_html(report_data)
-            elif report_data['report_type'] == "Adventitious Agent Detection":
-                html_content = self.ad_html_generator.generate_html(report_data)
-            elif report_data['report_type'] == "PhiX Validation":        
-                html_content = self.val_html_generator.generate_html(report_data)
-            else:
-                QMessageBox.warning(
-                    self,
-                    "Error",
-                    "Please select a valid report type"
-                )
-                return None
-
-            return html_content
-
-        except Exception as e:
-            QMessageBox.critical(
+        report_data, warnings = self.handler.collect_report_data(left_panel, middle_panel, right_panel)
+                    
+        # If there are warnings, show them and return None
+        if warnings:
+            QMessageBox.warning(
+                self,
+                "Validation Error",
+                "Please fix the following issues:\n• " + "\n• ".join(warnings)
+            )
+            return None          
+    
+        # Generate HTML content 
+        if report_data['report_type'] == "DNA Genome Integrity":
+            html_content = self.dnagi_html_generator.generate_html(report_data)
+        elif report_data['report_type'] == "Adventitious Agent Detection":
+            html_content = self.ad_html_generator.generate_html(report_data)
+        elif report_data['report_type'] == "PhiX Validation":        
+            html_content = self.val_html_generator.generate_html(report_data)
+        else:
+            QMessageBox.warning(
                 self,
                 "Error",
-                f"Error creating report: {str(e)}"
-            )        
+                "Please select a valid report type"
+            )
+            return None
+
+        return html_content
+
+        # except Exception as e:
+        #     QMessageBox.critical(
+        #         self,
+        #         "Error",
+        #         f"Error creating report: {str(e)}"
+        #     )        
 
     def create_report(self):
         # Get HTML content and report data
