@@ -55,12 +55,12 @@
         <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
       </div>
       <div class="page-body">
-        <div class='template-title'><h2>NextSeq 550 run details:</h2><br></div>
+        <div class='template-title'><h2>Illumina NextSeq 550 run details:</h2><br></div>
         <div class='template-block'>
-          <h2>Run #:</h2><br>
-          <h2>Flow cell #:</h2><br>
-          <h2>Run date: </h2><br>
-          <h2>Technician:</h2><br>
+          <h3 style="color: gray; font-weight: normal;">Run #: {run}</h3><br>
+          <h3 style="color: gray; font-weight: normal;">Flow cell: {flow_cell}</h3><br>
+          <h3 style="color: gray; font-weight: normal;">Run date: {run_date}</h3><br>
+          <h3 style="color: gray; font-weight: normal;">Technician: {tech}</h3><br>
         </div>
       </div>
       <div class="page-footer">
@@ -119,9 +119,9 @@
             <tbody>
               <tr>
                 <td>ɸx174</td>
-                <td>5.386</td>
-                <td></td>
-                <td></td>
+                <td>{genome_size}</td>
+                <td>{bases_sequenced}</td>
+                <td>{coverage}</td>
               </tr>
             </tbody>
           </table>
@@ -149,8 +149,8 @@
           <p>This is an estimation of the accuracy of base calling while performing the sequencing by synthesis reaction in the flow-cell. This value is measured by the instrument while reading every synthesis reaction.</p>
           <p>The quality values are reported along with the data. The values are extracted from the data using a tool called fastqc.</p>
 
-          <img src='per_base_quality_img' alt='Per base quality plot' class='per-base-quality'>
-          <p>Figure 1: Per base sequencing quality</p><br>   
+          <img src={per_base_quality_img} alt='Per base quality plot' class='per-base-quality'>
+          <p>Figure 1: Per base sequencing quality</p> 
           <p>This figure shows the per base sequencing quality of the reads as calculated using the as per the Illumina standard as defined <a href="https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/quality-scores.html#:~:text=What%20is%20a%20Quality%20Score,developed%20for%20Sanger%20sequencing%20experiments.">here</a></p>
           <p>The figure depicts average per base sequencing quality as a boxplot of values at each base in the read. This serves as a guide for pre-processing of the reads for quality filtration and read trimming.</p>
           <p>A phred33 score over 30 implies a base call accuracy of 99.9%. For all the positions, 90% of the reads have a quality score above Q30 and thus pass the QC check for further analysis</p>
@@ -162,7 +162,147 @@
       </div>
     </div>
   </div>
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Sequencing quality - Adapter contamination </h2></div>
+        <div class='template-block'>
+          <p>Illumina uses adapter sequences - neutral DNA sequences included in the sequencing chemistry to enable annealing of the target strand to the flow cell adapters. In some cases, these sequences may remain in the final processed sample and could result in being over-represented.</p>
+          <p>This adapter sequence is of no use in the sample analysis and can decrease the potential usable information from any NGS experiment. To estimate this, fastqc checks each individual sequencing read for the presence of a list of standard adapter sequences used by Illumina.</p>
+          <p>The figure below represents amount of adapter sequences / 13 bases averaged over each sequencing read in the sample.</p>
+
+          <img src={adapter_content_img} alt='Adaptor contamination plot' class='adaptor-plot'>
+          <p>Figure 2: Adaptor Contamination Plot</p> 
+          <p>This NGS run yielded results that were completely free of the standard adapter sequences tested.</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">6</p>
+      </div>
+    </div>
+  </div>
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Sequencing accuracy estimation </h2></div>
+        <div class='template-block'>
+          <p>The phiX174 DNA control is a sample with known sequence. Each read is thus aligned with the reference sequence using bowtie2 and the most stringent alignment parameters.</p>
+          <p>Bowtie2 parameters :</p>
+          <ul>
+            <li>Reporting parameters : –all reports all possible alignments</li>
+          </ul>
+          <p>Alignment parameters:</p>
+          <ul>
+            <li>End to end alignment mode. Thus ensures that entire reads are considered while calculating  alignments.</li>
+          </ul>
+          <p>Mismatch penalty calculation function</p>
+          <p>–very-sensitive. Where:</p>
+          <ul>
+            <li>D 20 -R 3 -N 0 -L 20 -i S,1,0.50</li>
+            <li>D - The minimum matching length of initial seed 25% of the read length.</li>
+            <li>R - The offset between two consecutive alignments is 3 bases.</li>
+            <li>N - Zero iterations allowed to extend the read alignment.</li>
+            <li>L - Minimum read length that needs to align for a match to be called.</li>
+            <li>i Mismatch calculation scales as a function of square of misaligned length</li>
+          </ul>
+          <p>This alignment mode of bowtie2 allows for find exact matching alignments that can harbour upto 4 mismatches in a read of length 120</p>
+          <p>Alignment statistics:</p>
+          <p>{alignment_stats}</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">7</p>
+      </div>
+    </div>
+  </div>
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Per base sequencing accuracy </h2></div>
+        <div class='template-block'>
+          <img src={average_base_calling_accuracy_img} alt='Average Base Calling Accuracy Plot' class='avg_base_calling_accuracy_img'>
+          <p>Figure 3: Per base sequencing accuracy averaged over 1000000 individual reads, each read of length shown on X-axis</p>
+          <p>10 sets of 100000 reads were randomly sampled to calculate the accuracy of match.</p>
+          <p>X axis denotes individual nucleotide position in a sequence read. </p> 
+          <p>Each bar is an average of base calling accuracy at every position in the read, the black bars on top are the standard deviation in this accuracy.</p>
+          <p>The black horizontal line denotes the minimum benchmark of 98.5% accuracy provided by Illumina for this particular sequencing reagent set.</p><br>
+          <p>The base quality at every base is above the benchmark of the minimum accuracy provided by the manufacturer.</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">8</p>
+      </div>
+    </div>
+  </div>
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Per base sequencing accuracy </h2></div>
+        <div class='template-block'>
+          <p>Sequencing coverage is defined as :</p>
+          <p>Number of total bases sequenced / Number of bases in the reference sequence                     [1]</p>
+          <p>Number of total bases sequenced can be calculated as :</p>
+          <p>Number of bases per sequencing reads x Total number of sequences reads                          [2]</p>
+          <p>In this case it is 120 x {bases_sequenced} = {bases_sequenced} bases</p>
+          <p>That is {bases_sequenced} Megabases of DNA sequence information.</p>
+          <p>Thus the expected coverage based on Formula [1] is:</p>
+          <p>{coverage}/5386 =  X coverage of the phiX174 reference genome.</p> 
+          <p>Sequencing coverage per reference is calculated using alignment data from the output of bowtie2.</p>
+          <p>A sliding window of length = 120 bases is used to measure the number of reads in that window, with an offset of 40 bases. Reads that occur in adjacent windows are only counted in the first window they occur in.</p>
+          <p>A non uniform amplification of the DNA library could result into skewed sequencing coverage along the length of the reference genome. A non uniform coverage could lead to copy number estimation errors and assignment of confidence values in genome assembly.</p>
+          <p>We plot the sequencing coverage of the phiX174 genome in 100 base windows as derived from this sequencing run.</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">9</p>
+      </div>
+    </div>
+  </div>
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Per base sequencing accuracy </h2></div>
+        <div class='template-block'>
+          <img src={basecoverage_img} alt='Base Coverage Plot' class='basecoverage_img'>
+          <p>Figure 4: Per base sequencing accuracy averaged over individual reads, each read of length shown on X-axis</p>
+          <p>The X axis is the base position in the reference genome phiX174</p>
+          <p>The blue dotted line is the theoretically calculated from the number of reads. The black dashed lines are denote 1% higher and lower coverage than the theoretically calculated value.</p> 
+          <p>The genome coverage is uniformly distributed across the length of the reference spike in sample.</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">10</p>
+      </div>
+    </div>
+  </div>
 </body>
+
+
 
 
 
