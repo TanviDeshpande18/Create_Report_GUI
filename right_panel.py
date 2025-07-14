@@ -20,7 +20,7 @@ from html.parser import HTMLParser
 from io import StringIO
 import tempfile
 import webbrowser
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QComboBox, QLineEdit
 from PyQt5.QtWebEngineWidgets import QWebEnginePage
 from PyQt5.QtCore import QUrl, QEventLoop
 import sys
@@ -132,24 +132,80 @@ class RightPanelWidget(QWidget):
         self.conclusion_text = QTextEdit()
         self.conclusion_text.setPlaceholderText("Enter your conclusion here...")
         self.conclusion_text.setMinimumHeight(50)
+        self.conclusion_text.setMaximumHeight(400)
         conclusion_layout.addWidget(self.conclusion_text)
         
         conclusion_group.setLayout(conclusion_layout)
-        layout.addWidget(conclusion_group)   
+        conclusion_group.setMaximumHeight(400)
+        layout.addWidget(conclusion_group)  
 
-        # # Create preview group box with scroll area
-        # preview_group = QGroupBox("Document Content")
-        # preview_layout = QVBoxLayout()
-        # preview_group.setLayout(preview_layout)
+        ## Add appendix section 
+        appendix_group = QGroupBox("Add Appendix")
+        appendix_layout = QVBoxLayout()
+        appendix_layout.setAlignment(Qt.AlignTop)  # Keep content at the top
 
-        # # Create text edit for content display
-        # self.content_display = QTextEdit()
-        # self.content_display.setReadOnly(True)
-        # preview_layout.addWidget(self.content_display)
+        # Container to hold all appendix combos
+        self.appendix_combos_layout = QVBoxLayout()
+        self.appendix_combos_layout.setAlignment(Qt.AlignTop)
+        appendix_layout.addLayout(self.appendix_combos_layout)
 
-        # # Add preview group to main layout
-        # self.main_layout.addWidget(preview_group)
+        # Add first combo
+        self.add_appendix_combo()
 
+        # Plus button to add more combos
+        add_appendix_btn = QPushButton("Add Appendix +")
+        add_appendix_btn.setFixedWidth(120)
+        add_appendix_btn.clicked.connect(self.add_appendix_combo)
+        appendix_layout.addWidget(add_appendix_btn, alignment=Qt.AlignLeft)
+
+        appendix_group.setLayout(appendix_layout)
+        layout.addWidget(appendix_group)
+
+    def add_appendix_combo(self):
+        """Add a new combo of text box and dropdown to the appendix section, with dropdown on the next line, a remove button, and a dynamic title."""
+        # Count current appendix widgets to determine the number
+        count = self.appendix_combos_layout.count() + 1
+        appendix_titles = [
+            "Appendix 1", "Appendix 2", "Appendix 3", "Appendix 4", "Appendix 5",
+            "Appendix 6", "Appendix 7", "Appendix 8", "Appendix 9", "Appendix 10"
+        ]
+        title = appendix_titles[count - 1] if count <= len(appendix_titles) else f"Appendix {count}"
+
+        combo_widget = QWidget()
+        combo_layout = QVBoxLayout(combo_widget)
+        combo_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Add the title label
+        title_label = QLabel(title)
+        title_label.setStyleSheet("font-weight: bold; margin-bottom: 4px;")
+        combo_layout.addWidget(title_label)
+
+        textbox = QLineEdit()
+        textbox.setPlaceholderText("Appendix text")
+        dropdown = QComboBox()
+        dropdown.addItems(["Option 1", "Option 2", "Option 3"])  # Customize as needed
+
+        # Remove button
+        remove_btn = QPushButton("−")
+        remove_btn.setFixedWidth(30)
+        remove_btn.setToolTip("Remove this appendix")
+        remove_btn.clicked.connect(lambda: self.remove_appendix_combo(combo_widget))
+
+        # Layout for dropdown and remove button on the same row
+        dropdown_row = QHBoxLayout()
+        dropdown_row.addWidget(dropdown)
+        dropdown_row.addWidget(remove_btn)
+        dropdown_row.addStretch()
+
+        combo_layout.addWidget(textbox)
+        combo_layout.addLayout(dropdown_row)
+
+        self.appendix_combos_layout.addWidget(combo_widget)
+
+    def remove_appendix_combo(self, widget):
+        """Remove the given appendix combo widget."""
+        self.appendix_combos_layout.removeWidget(widget)
+        widget.setParent(None)
 
 
     def export_to_pdf(self):
@@ -202,47 +258,47 @@ class RightPanelWidget(QWidget):
 
     def get_data_and_html_content(self):
         """Collect report data from both panels and validate."""
-        # try:
-        # Get the main window and find left panel
-        main_window = self.window()  # Get the top-level window
-        left_panel = main_window.findChild(QWidget, "left_panel")
-        middle_panel = main_window.findChild(QWidget, "middle_panel")
-        right_panel = main_window.findChild(QWidget, "right_panel")
+        try:
+            # Get the main window and find left panel
+            main_window = self.window()  # Get the top-level window
+            left_panel = main_window.findChild(QWidget, "left_panel")
+            middle_panel = main_window.findChild(QWidget, "middle_panel")
+            right_panel = main_window.findChild(QWidget, "right_panel")
 
-        report_data, warnings = self.handler.collect_report_data(left_panel, middle_panel, right_panel)
-                    
-        # If there are warnings, show them and return None
-        if warnings:
-            QMessageBox.warning(
-                self,
-                "Validation Error",
-                "Please fix the following issues:\n• " + "\n• ".join(warnings)
-            )
-            return None          
-    
-        # Generate HTML content 
-        if report_data['report_type'] == "DNA Genome Integrity":
-            html_content = self.dnagi_html_generator.generate_html(report_data)
-        elif report_data['report_type'] == "Adventitious Agent Detection":
-            html_content = self.ad_html_generator.generate_html(report_data)
-        elif report_data['report_type'] == "PhiX Validation":        
-            html_content = self.val_html_generator.generate_html(report_data)
-        else:
-            QMessageBox.warning(
+            report_data, warnings = self.handler.collect_report_data(left_panel, middle_panel, right_panel)
+                        
+            # If there are warnings, show them and return None
+            if warnings:
+                QMessageBox.warning(
+                    self,
+                    "Validation Error",
+                    "Please fix the following issues:\n• " + "\n• ".join(warnings)
+                )
+                return None          
+        
+            # Generate HTML content 
+            if report_data['report_type'] == "DNA Genome Integrity":
+                html_content = self.dnagi_html_generator.generate_html(report_data)
+            elif report_data['report_type'] == "Adventitious Agent Detection":
+                html_content = self.ad_html_generator.generate_html(report_data)
+            elif report_data['report_type'] == "PhiX Validation":        
+                html_content = self.val_html_generator.generate_html(report_data)
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    "Please select a valid report type"
+                )
+                return None
+
+            return html_content
+
+        except Exception as e:
+            QMessageBox.critical(
                 self,
                 "Error",
-                "Please select a valid report type"
-            )
-            return None
-
-        return html_content
-
-        # except Exception as e:
-        #     QMessageBox.critical(
-        #         self,
-        #         "Error",
-        #         f"Error creating report: {str(e)}"
-        #     )        
+                f"Error creating report: {str(e)}"
+            )        
 
     def create_report(self):
         # Get HTML content and report data

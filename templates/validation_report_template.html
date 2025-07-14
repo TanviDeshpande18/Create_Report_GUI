@@ -195,6 +195,7 @@
       <div class="page-body">
         <div class='template-title'><h2>Sequencing accuracy estimation </h2></div>
         <div class='template-block'>
+          <br>
           <p>The phiX174 DNA control is a sample with known sequence. Each read is thus aligned with the reference sequence using bowtie2 and the most stringent alignment parameters.</p>
           <p>Bowtie2 parameters :</p>
           <ul>
@@ -258,10 +259,11 @@
       <div class="page-body">
         <div class='template-title'><h2>Per base sequencing accuracy </h2></div>
         <div class='template-block'>
+          <br>
           <p>Sequencing coverage is defined as :</p>
-          <p>Number of total bases sequenced / Number of bases in the reference sequence                     [1]</p>
+          <p>Number of total bases sequenced / Number of bases in the reference sequence                     [1]</p><br>
           <p>Number of total bases sequenced can be calculated as :</p>
-          <p>Number of bases per sequencing reads x Total number of sequences reads                          [2]</p>
+          <p>Number of bases per sequencing reads x Total number of sequences reads                          [2]</p><br>
           <p>In this case it is 120 x {bases_sequenced} = {bases_sequenced} bases</p>
           <p>That is {bases_sequenced} Megabases of DNA sequence information.</p>
           <p>Thus the expected coverage based on Formula [1] is:</p>
@@ -300,6 +302,59 @@
       </div>
     </div>
   </div>
+
+  <div  class="a4-container">
+    <div class="flex-rows">
+      <div class="page-header">
+        <img src='{company_logo}' alt='Sample Image 2' class='logo-header'>
+      </div>
+      <div class="page-body">
+        <div class='template-title'><h2>Conclusions </h2></div>
+        <div class='template-block'>
+          <p>The NextSeq 550 Run # {project}</p>
+          <table class="table1">
+            <thead>
+              <tr>
+                <th>Quality parameter</th>
+                <th>Benchmark value</th>
+                <th>Actual value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Minimum percentage of reads above Q30 at every position</td>
+                <td>90%</td>
+                <td>98.3%</td>
+              </tr>
+              <tr>
+                <td>Adapter contamination</td>
+                <td>&lt; 1.5 %</td>
+                <td>0%</td>
+              </tr>
+              <tr>
+                <td>Minimum base-calling accuracy at each position</td>
+                <td>98.5 %</td>
+                <td>99.99%</td>
+              </tr>
+              <tr>
+                <td>Variation in sequencing coverage of reference genome</td>
+                <td>2%</td>
+                <td>0.72%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>This NGS run passes all quality parameters set by Epidote Healthcare</p>
+          <p>This data is cleared for any subsequent bioinformatic analyses.</p>
+          <p>No further validation of bioinformatic pipelines with regards to sequencing accuracy is necessary.</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <p class="footer-name">2020 Epidote Healthcare LLP </p>
+        <p class="footer-page-number">10</p>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 
