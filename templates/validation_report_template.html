@@ -57,10 +57,11 @@
       <div class="page-body">
         <div class='template-title'><h2>Illumina NextSeq 550 run details:</h2><br></div>
         <div class='template-block'>
-          <h3 style="color: gray; font-weight: normal;">Run #: {run}</h3><br>
-          <h3 style="color: gray; font-weight: normal;">Flow cell: {flow_cell}</h3><br>
-          <h3 style="color: gray; font-weight: normal;">Run date: {run_date}</h3><br>
-          <h3 style="color: gray; font-weight: normal;">Technician: {tech}</h3><br>
+          <br><br>
+          <h3 style="color: gray; font-weight: normal;">Run #: {run}</h3>
+          <h3 style="color: gray; font-weight: normal;">Flow cell: {flow_cell}</h3>
+          <h3 style="color: gray; font-weight: normal;">Run date: {run_date}</h3>
+          <h3 style="color: gray; font-weight: normal;">Technician: {tech}</h3>
         </div>
       </div>
       <div class="page-footer">
@@ -120,7 +121,7 @@
               <tr>
                 <td>ɸx174</td>
                 <td>{genome_size}</td>
-                <td>{bases_sequenced}</td>
+                <td>{bases_sequenced_in_Mb}</td>
                 <td>{coverage}</td>
               </tr>
             </tbody>
@@ -263,13 +264,29 @@
           <p>Sequencing coverage is defined as :</p>
           <p>Number of total bases sequenced / Number of bases in the reference sequence                     [1]</p><br>
           <p>Number of total bases sequenced can be calculated as :</p>
-          <p>Number of bases per sequencing reads x Total number of sequences reads                          [2]</p><br>
-          <p>In this case it is 120 x {bases_sequenced} = {bases_sequenced} bases</p>
-          <p>That is {bases_sequenced} Megabases of DNA sequence information.</p>
+            <p>Number of bases per sequencing reads x Total number of sequences reads                        [2]</p><br>
+            <table class="table2">
+            <thead>
+              <tr>
+              <th>Parameter</th>
+              <th>Calculation</th>
+              <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+              <td>Number of total bases sequenced (Formula [2])</td>
+              <td>{read_length} x {bases_sequenced_bp}</td>
+              <td>{total_number_of_bases} bases</td>
+              </tr>
+             </tbody>
+            </table>
+          <!-- <p>In this case it is {read_length} x {bases_sequenced_bp} = {total_number_of_bases} bases</p> -->
+          <p>That is {bases_sequenced_in_Mb} Megabases of DNA sequence information.</p>
           <p>Thus the expected coverage based on Formula [1] is:</p>
-          <p>{coverage}/5386 =  X coverage of the phiX174 reference genome.</p> 
+          <p>{total_number_of_bases}/ {genome_size_in_bp} =  {expected_coverage} X coverage of the phiX174 reference genome.</p><br>
           <p>Sequencing coverage per reference is calculated using alignment data from the output of bowtie2.</p>
-          <p>A sliding window of length = 120 bases is used to measure the number of reads in that window, with an offset of 40 bases. Reads that occur in adjacent windows are only counted in the first window they occur in.</p>
+          <p>A sliding window of length = {read_length} bases is used to measure the number of reads in that window, with an offset of 40 bases. Reads that occur in adjacent windows are only counted in the first window they occur in.</p>
           <p>A non uniform amplification of the DNA library could result into skewed sequencing coverage along the length of the reference genome. A non uniform coverage could lead to copy number estimation errors and assignment of confidence values in genome assembly.</p>
           <p>We plot the sequencing coverage of the phiX174 genome in 100 base windows as derived from this sequencing run.</p>
         </div>
@@ -289,6 +306,7 @@
       <div class="page-body">
         <div class='template-title'><h2>Per base sequencing accuracy </h2></div>
         <div class='template-block'>
+          <br>
           <img src={basecoverage_img} alt='Base Coverage Plot' class='basecoverage_img'>
           <p>Figure 4: Per base sequencing accuracy averaged over individual reads, each read of length shown on X-axis</p>
           <p>The X axis is the base position in the reference genome phiX174</p>
@@ -346,11 +364,14 @@
           <p>This NGS run passes all quality parameters set by Epidote Healthcare</p>
           <p>This data is cleared for any subsequent bioinformatic analyses.</p>
           <p>No further validation of bioinformatic pipelines with regards to sequencing accuracy is necessary.</p>
+          <br><br><br><br><br><br><br>
+          <p>{poi_prj_coord}</p><br>
+          <p>Date: </p>
         </div>
       </div>
       <div class="page-footer">
         <p class="footer-name">2020 Epidote Healthcare LLP </p>
-        <p class="footer-page-number">10</p>
+        <p class="footer-page-number">11</p>
       </div>
     </div>
   </div>

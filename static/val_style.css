@@ -18,6 +18,7 @@
   margin: 0 auto;
   background: #fff;
   box-sizing: border-box;
+  line-height: 20px;
   padding: 20px;
   overflow: hidden;
   page-break-after: always;
@@ -52,7 +53,7 @@
 }
 
 .page-body {
-  flex: 1 1 93%;
+  flex: 1 1 94%;
   width: 100%;
   padding-left: 20px;
   padding-right: 20px;
@@ -61,8 +62,9 @@
 }
 
 .page-footer {
-  flex: 0 0 2%;
+  flex: 0 0 1%;
   width: 100%;
+  border-top: 1px dotted gray;
   /* background: #f5f5f5; */
   display: flex;
   /* align-items: center;
@@ -264,7 +266,8 @@
 
 .per-base-quality, .adaptor-plot, .avg_base_calling_accuracy_img, .basecoverage_img{
   max-width: 100%;
-  height: auto;
+  min-width: 90%;
+  height: 400px;
   display: block;
   margin: 20px auto;
   border: 1px solid #ccc;

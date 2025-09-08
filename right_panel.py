@@ -181,7 +181,7 @@ class RightPanelWidget(QWidget):
         combo_layout.addWidget(title_label)
 
         textbox = QLineEdit()
-        textbox.setPlaceholderText("Appendix text")
+        textbox.setPlaceholderText("Appendix Title")
         dropdown = QComboBox()
         dropdown.addItems(["Option 1", "Option 2", "Option 3"])  # Customize as needed
 

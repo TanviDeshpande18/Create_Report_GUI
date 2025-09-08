@@ -132,7 +132,9 @@ class VAL_HTMLGenerator:
                 template = f.read()
             
             # Format samples and templates lists
-            samples_html = '\n'.join([f'<a>{sample}</a>' for sample in report_data['selected_samples']])
+            samples_list = report_data.get('selected_samples')
+            samples_list = [x.split(' (')[1].strip(')') for x in samples_list]
+            samples_html = '\n'.join([f'<a>{sample}</a>' for sample in samples_list])
 
             # Get company and DNA logos
             company_logo = logos['company'] if logos and 'company' in logos else ''
@@ -143,6 +145,15 @@ class VAL_HTMLGenerator:
             average_base_calling_accuracy_img = val_data_images['average_base_calling_accuracy'] if val_data_images and 'average_base_calling_accuracy' in val_data_images else ''
             basecoverage_img = val_data_images['basecoverage'] if val_data_images and 'basecoverage' in val_data_images else ''
             per_base_quality_img = val_data_images['per_base_quality'] if val_data_images and 'per_base_quality' in val_data_images else '' 
+
+            # Calculate Statistics for the report
+            #Number of bases sequenced in Mb = number of reads (in fastqc file) x 2 (if paired end) x read length (in fastqc file) bases ---- convert to Mb
+            bases_sequenced_bp = val_json['Number_of_reads'] * val_json['Paired_end']
+            bases_sequenced_in_Mb = ((val_json['Number_of_reads'] * val_json['Paired_end'] * val_json['Read_length']) / 1e6)
+            total_number_of_bases = val_json['Read_length'] * val_json['Number_of_reads'] * val_json['Paired_end']
+            expected_coverage = total_number_of_bases / (val_json['Genome_size_Kb'] * 1e3)
+            #X coverage of sequenced data =( Number of bases sequenced in Mb (above calc) * 1000000  (if converted to Mb)) / Genome size in bp (in json file)
+            coverage = (bases_sequenced_in_Mb * 1e6) / (val_json['Genome_size_Kb'] * 1e3)
             
 
             with open(self.stylesheet) as f:
@@ -160,9 +171,15 @@ class VAL_HTMLGenerator:
                 run_date = val_json['Run_date'],
                 tech = val_json['Technician'],
                 genome_size = val_json['Genome_size_Kb'],
-                bases_sequenced = val_json['Number_of_bases_sequenced_Mb'],
-                coverage = val_json['Coverage_of_sequenced_data'],
+                genome_size_in_bp  = val_json['Genome_size_Kb'] * 1e3,
+                bases_sequenced_in_Mb = round(bases_sequenced_in_Mb,2),
+                
+                coverage =round(coverage,2),
                 alignment_stats = val_json['Alignment_statistics'].replace('\n', '<br><br>'),
+                read_length = val_json['Read_length'],
+                bases_sequenced_bp = bases_sequenced_bp,
+                total_number_of_bases = total_number_of_bases,
+                expected_coverage = round(expected_coverage,2),
 
                 adapter_content_img=adapter_content_img,
                 average_base_calling_accuracy_img=average_base_calling_accuracy_img,
